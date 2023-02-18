@@ -1,5 +1,3 @@
-package classes;
-
 public class Magazzino {
 	private String idMagazzino;
 	private int giacenzaAttuale;

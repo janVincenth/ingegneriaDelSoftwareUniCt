@@ -1,5 +1,3 @@
-package classes;
-
 import java.util.ArrayList;
 
 //no class descrizioneProdotto
@@ -42,7 +40,7 @@ public class Prodotto {
 		this.denominazione = denominazione;
 	}
 
-	public int getPrezzo() {
+	public float getPrezzo() {
 		return prezzo;
 	}
 

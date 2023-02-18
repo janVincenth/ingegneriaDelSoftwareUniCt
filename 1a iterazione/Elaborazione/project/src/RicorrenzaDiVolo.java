@@ -1,5 +1,3 @@
-package classes;
-
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
@@ -25,15 +23,15 @@ public class RicorrenzaDiVolo {
 		this.durataNominale = durataNominale;
 	}
 	
-	public RicorrenzaDiVolo getRicorrenzaPerPreferenze(String partenza, String destinazione, LocalDate data, LocalTime ora) {
+	/*public RicorrenzaDiVolo getRicorrenzaPerPreferenze(String partenza, String destinazione, LocalDate data, LocalTime ora) {
 		//da implementare
-	}
+	}*/
 	
 	//eliminare da questa classe
-	public ArrayList<RicorrenzaDiVolo> creaListaRicorrenze(){
+	/*public ArrayList<RicorrenzaDiVolo> creaListaRicorrenze(){
 		ArrayList<RicorrenzaDiVolo> prodotti = new ArrayList<RicorrenzaDiVolo>();
 		return ricorrenze;
-	}
+	}*/
 	
 	//addRicorrenza costituisce un'operazione standard su List fatta da main in Air-Manager
 	

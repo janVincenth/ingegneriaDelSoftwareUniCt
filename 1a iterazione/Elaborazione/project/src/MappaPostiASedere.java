@@ -1,5 +1,3 @@
-package classes;
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -10,7 +8,7 @@ public class MappaPostiASedere {
 	public MappaPostiASedere(short numeroPostiDisponibili, boolean libero) {
 		for(int i=0; i < this.numeroPostiDisponibili; i++) {
 			this.postiOccupati = new HashMap<>();
-			postiOccupati.put(i, libero); //tutti i posti a sedere sono inizialmente liberi
+			postiOccupati.put((short)i, libero); //tutti i posti a sedere sono inizialmente liberi
 		}
 		this.numeroPostiDisponibili = numeroPostiDisponibili;
 	}
@@ -41,7 +39,7 @@ public class MappaPostiASedere {
 				return (short) i;
 			}
 		}
-		
+		return 1;
 	}
 	
 	public Map<Short, Boolean> getPostiOccupati() {

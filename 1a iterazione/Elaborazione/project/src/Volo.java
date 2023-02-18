@@ -1,5 +1,3 @@
-package classes;
-
 import java.util.ArrayList;
 
 public class Volo {
@@ -15,8 +13,8 @@ public class Volo {
 		return voli;
 	}
 
-	public boolean(Volo volo) {
-		//...
+	public boolean ciao(Volo volo) {
+		return false;
 	}
 	
 	public String getNumeroVolo() {
