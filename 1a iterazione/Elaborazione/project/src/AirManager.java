@@ -1,6 +1,5 @@
 import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.Scanner;
+import java.util.*;
 import java.time.LocalDate;
 
 public class AirManager {
@@ -10,8 +9,10 @@ public class AirManager {
 	//collezioni
 	private ArrayList<Volo> voli;
 	//private ArrayList<Prenotazione> prenotazioni; 
-	private ArrayList<Prodotto> prodotti; 
+	private ArrayList<Prodotto> prodotti;
+	private static Map<String, String> aeroporti;
 	//istanze
+	//
 	private Volo v1, v2, voloCorrente;
 	private Prodotto pr1, pr2;
 	//private Prenotazione p1, p2;
@@ -20,13 +21,16 @@ public class AirManager {
 		Scanner scanner = new Scanner(System.in);
 		
 		System.out.println("Benvenuto in Air-Manager!\nStai utilizzando il software come impiegato o come cliente?");
+
+		String[] userOptions = {"1. Cliente", "2. Impiegato"};
+		printMenu(userOptions);
 		
-		String user = scanner.nextLine().toLowerCase();
+		int user = Integer.parseInt(scanner.nextLine());
 		
-		if(user.equals("cliente")) { //utilizzo da parte di un cliente
+		if(user==1) { //utilizzo da parte di un cliente
 			routineCliente(scanner);
 		}
-		else if(user.equals("impiegato")) { //utilizzo da parte di un impiegato
+		else if(user==2) { //utilizzo da parte di un impiegato
 			routineImpiegato(scanner);			
 		}
 		else System.out.println("Il valore inserito non è valido. Ritenta.");
@@ -72,14 +76,32 @@ public class AirManager {
 		String aeroportoPartenza;
 		String aeroportoDestinazione;
 		LocalDate dataPartenza;
+		aeroporti = new HashMap<>();
 
-		System.out.println("\nInserisci l'aeroporto di partenza"); //da implementare una lista di aeroporti da cui scegliere tramite elenco puntato
-		String aeroportoPartenza= scanner.nextLine().toLowerCase();
-		System.out.println("\nInserisci l'aeroporto di arrivo"); //come sopra
-		String aeroportoDestinazione= scanner.nextLine().toLowerCase();
+		//INIZIALIZZO LA COLLEZIONE CON AEROPORTI PRE-SELEZIONATI
+		aeroporti.put("CTA","FONTANA ROSSA (Catania)");
+		aeroporti.put("FCO","FIUMICINO (Roma)");
+		aeroporti.put("FLR","PERETOLA (Firenze)");
+
+
+		System.out.println("\nEcco la lista degli aeroporti da cui puoi partire! \nPer favore, scegli un aeroporto di partenza digitando il codice IATA corrispondente:"); //da implementare una lista di aeroporti da cui scegliere tramite elenco puntato
+
+		Iterator<Map.Entry<String, String>> demoAeroporti = aeroporti.entrySet().iterator();
+		while(demoAeroporti.hasNext()){
+			Map.Entry<String, String> demoAeroporto= demoAeroporti.next();
+			System.out.println("Codice IATA: " + demoAeroporto.getKey() + " - Denominazione: " + demoAeroporto.getValue() );
+		}
+
+		aeroportoPartenza= scanner.nextLine();
+
+		System.out.println("\nBene, partirai da: " +aeroporti.get(aeroportoPartenza) +". \nAdesso cortesemente digita il codice IATA dell'aeroporto di arrivo"); //come sopra
+
+
+
+		/*String aeroportoDestinazione= scanner.nextLine().toLowerCase();
 		System.out.println("\nInserisci la data di partenza nel formato dd/mm/yyyy");
-		LocalDate dataPartenza= ;
-		//matchPreferenze()
+		LocalDate dataPartenza=  ;
+		matchPreferenze()*/
 	}
 
 	private static void routineImpiegato(Scanner scanner) {
@@ -162,7 +184,7 @@ public class AirManager {
 	public static void printMenu(String[] strings) {
 		for(String string : strings)
 			System.out.println(string);
-		System.out.println("\nInserisci il numero dell'operazione che vuoi effettuare: ");
+		System.out.println("\nEffettua una scelta: "); //MODIFICATO PERCHè QUANDO SCEGLI L'USER NON HA SENSO PARLARE DI OPERAZIONI
 	}
 	
 	/*public void setVolo(String numeroVolo) {
