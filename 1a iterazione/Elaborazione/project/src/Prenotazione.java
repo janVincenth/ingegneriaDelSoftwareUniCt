@@ -1,12 +1,12 @@
-import java.util.Date;
+import java.time.LocalDate;
 
 public class Prenotazione {
 
     String numeroPrenotazione;
-    Date Data;
+    LocalDate data;
     Float importo;
 
-    Cliente Cliente; //puntatore
+    Cliente cliente; //puntatore
     DocumentoIdentita documentoIdentita; // puntatore
     RicorrenzaDiVolo ricorrenzaDiVolo; // puntatore
 
@@ -16,12 +16,12 @@ public class Prenotazione {
     public void associaClienteAPrenotazione(String codiceFiscale){
 
     }
-    public Date getDataPrenotazione(){
-        return Data;
+    public LocalDate getDataPrenotazione(){
+        return data;
 
     }
-    public Cliente getcliente(){
-        return Cliente;
+    public Cliente getCliente(){
+        return cliente;
 
     }
     public DocumentoIdentita getDocumentoIdentita(){
@@ -33,8 +33,8 @@ public class Prenotazione {
         this.numeroPrenotazione = numeroPrenotazione;
     }
 
-    public void setData(Date data) {
-        Data = data;
+    public void setData(LocalDate data) {
+        this.data = data;
     }
 
     public void setImporto(Float importo) {
@@ -42,7 +42,7 @@ public class Prenotazione {
     }
 
     public void setCliente(Cliente cliente) {
-        Cliente = cliente;
+        this.cliente = cliente;
     }
 
     public void setDocumentoIdentita(DocumentoIdentita documentoIdentita) {

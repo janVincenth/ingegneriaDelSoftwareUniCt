@@ -5,51 +5,55 @@ import java.time.LocalDate;
 public class AirManager {
 	//aggiungere metodi getters & setters
 	private static AirManager airManager;
-	
+
 	//collezioni
 	private ArrayList<Volo> voli;
-	//private ArrayList<Prenotazione> prenotazioni; 
+	private ArrayList<Prenotazione> prenotazioni;
 	private ArrayList<Prodotto> prodotti;
 	private static Map<String, String> aeroporti;
 	//istanze
 	//
 	private Volo v1, v2, voloCorrente;
 	private Prodotto pr1, pr2;
-	//private Prenotazione p1, p2;
-	
+	private Prenotazione p1, p2;
+	private Cliente cl1;
+	private Contatti c1;
+
 	public static void main(String[] args) {
+		airManager = AirManager.getInstance();
 		Scanner scanner = new Scanner(System.in);
-		
+
 		System.out.println("Benvenuto in Air-Manager!\nStai utilizzando il software come impiegato o come cliente?");
 
 		String[] userOptions = {"1. Cliente", "2. Impiegato"};
-		printMenu(userOptions);
-		
+		airManager.printMenu(userOptions);
+
 		int user = Integer.parseInt(scanner.nextLine());
-		
+
 		if(user==1) { //utilizzo da parte di un cliente
 			routineCliente(scanner);
 		}
 		else if(user==2) { //utilizzo da parte di un impiegato
-			routineImpiegato(scanner);			
+			routineImpiegato(scanner);
 		}
 		else System.out.println("Il valore inserito non è valido. Ritenta.");
-		
+
 	} //fine main
 
 	private static void routineCliente(Scanner scanner) {
-		String[] clientOptions = {"1. Effettuare una prenotazione (Acquisto biglietto)",
-				  "2. Cancellare una prenotazione",
-				  "3. Effettuare il check-in",
-				  "4. Esci da Air-Manager"
-				 };
+		String[] clientOptions = {"1. Effettua una prenotazione (Acquisto biglietto)",
+								  "2. Cancella una prenotazione",
+								  "3. Effettua il check-in",
+								  "4. Modifica una prenotazione già esistente",
+								  "5. Esci da Air-Manager"
+								 };
 		int option = 0;
-		while(option != 4) {
+		while(option != 5) {
 			System.out.println("\nSpecifica il numero dell'operazione che desideri effettuare fra le seguenti: ");
-			printMenu(clientOptions);
-			
-			option = Integer.parseInt(scanner.nextLine()); //alternativamente, posso usare System.nextInt()
-			
+			airManager.printMenu(clientOptions);
+
+			option = Integer.parseInt(scanner.nextLine());
+
 			switch(option) {
 				case 1:
 					System.out.println('1');
@@ -60,14 +64,53 @@ public class AirManager {
 					// cancellaPrenotazione();
 					break;
 				case 3:
-					System.out.println('3');
-					// effettuaCheckIn();
+					effettuaCheckIn(scanner);
 					break;
-				case 4: {
+				case 4:
+					System.out.println('4');
+					// modificaPrenotazione();
+					break;
+				case 5: {
 					System.out.println("\nGrazie per aver utilizzato Air-Manager!");
 					System.exit(0);
 					}
 			}
+		}
+	}
+
+	private static void effettuaCheckIn(Scanner scanner) {
+		System.out.println("Benvenuto nella procedura di check-in! Si prega di inserire il numero della prenotazione per cui effettuare il check-in");
+		//cliente inserisce numeroPrenotazione
+		String numeroPrenotazioneInput = scanner.nextLine().toLowerCase();
+
+		Prenotazione p = airManager.getPrenotazione(airManager.prenotazioni, numeroPrenotazioneInput);
+		if(p == null) //al momento non è data la possibilità di provare più volte consecutivamente, per semplicità
+			System.out.println("Non è stata trovata alcuna prenotazione avente il numero prenotazione inserito.");
+		else {
+			System.out.println("\nÈ stata trovata una prenotazione avente il seguente codice: " + numeroPrenotazioneInput + ". Si prega di inserire il codice del proprio documento d'identità:");
+			String codiceDocumento = scanner.nextLine().toLowerCase();
+			String codiceDocumentoPrenotazione = p.getDocumentoIdentita().getCodiceDocumento();
+			//if(!airManager.verificaCorrispondenzaDocumento(codiceDocumentoPrenotazione, codiceDocumento)) //differente da metodo DCD
+			//if(codiceDocumentoPrenotazione.equals(codiceDocumento))
+			if("AX00".equals(codiceDocumento))
+				System.out.println("Il codice documento fornito non corrisponde a quello associato alla prenotazione indicata.");
+			else System.out.println("\nCodice documento valido. Si prega di inserire la mail utilizzata in fase di prenotazione:");
+				String email = scanner.nextLine().toLowerCase();
+				String emailPrenotazione = p.getCliente().getContatti().getEmail();
+				//if(!airManager.verificaCorrispondenzaEmail(emailPrenotazione, email)) //differente da metodo in DCD
+				if(!emailPrenotazione.equals(email))
+				//if("a@hotmail.com".equals(email))
+					System.out.println("L'email fornita non corrisponde a quella associata alla prenotazione indicata.");
+				else System.out.println("\nEmail valida.");
+
+				//determino posto da proporre al cliente
+				short numeroPostoProposto = p.getRicorrenza().getMappaAssociata().definisciPosto();
+
+				System.out.println("Air-Manager ti propone il seguente posto a sedere: " + numeroPostoProposto + "\nAccetti?\n1. Sì\n2. No");
+				int option = scanner.nextInt();
+				if(option == 1) // scenario di successo
+					System.out.println("Posto accettato. Aggiorno mappa... (da continuare)");//aggiorna mappa setMappa
+				else System.out.println("Posto rifiutato (da continuare)");
 		}
 	}
 
@@ -79,7 +122,7 @@ public class AirManager {
 		aeroporti = new HashMap<>();
 
 		//INIZIALIZZO LA COLLEZIONE CON AEROPORTI PRE-SELEZIONATI
-		aeroporti.put("CTA","FONTANA ROSSA (Catania)");
+		aeroporti.put("CTA","FONTANAROSSA (Catania)");
 		aeroporti.put("FCO","FIUMICINO (Roma)");
 		aeroporti.put("FLR","PERETOLA (Firenze)");
 
@@ -105,71 +148,86 @@ public class AirManager {
 	}
 
 	private static void routineImpiegato(Scanner scanner) {
-		String[] employedOptions = {"1. Gestire scheda anagrafica prodotto",
- 				 "2. Effettua carico di magazzino per approvvigionamento aeromobile",
- 				 "3. Stampare lista dei prodotti in sottoscorta",
- 				 "4. Esci da Air-Manager"
-				};
-		
-		System.out.println("\nSpecifica il numero dell'operazione che desideri effettuare fra le seguenti: ");
-		printMenu(employedOptions);
-		
-		int option = Integer.parseInt(scanner.nextLine());
-		
-		switch(option) {
-			case 1:
-				System.out.println('1');
-				// gestisciSchedaAnagraficaProdotto();
-				break;
-			case 2:
-				System.out.println('2');
-				// effettuaCaricoMagazzino();
-				break;
-			case 3:
-				//code block
-				System.out.println('3');
-				//stampaListaProdottiInSottoscorta();
-				break;
-			case 4: {
-				System.out.println("\nGrazie per aver utilizzato Air-Manager!");
-				System.exit(0);
+		String[] employedOptions = {"1. Gestisci volo",
+									"2. Gestisci schedulazione volo",
+									"3. Assegna promozione",
+									"4. Gestisci anagrafica prodotto",
+									"5. Effettua carico di magazzino",
+									"6. Stampa lista dei prodotti in sottoscorta",
+									"7. Esci da Air-Manager"
+									};
+		int option= 0;
+		while(option != 7) {
+			System.out.println("\nSpecifica il numero dell'operazione che desideri effettuare fra le seguenti: ");
+			airManager.printMenu(employedOptions);
+			option = Integer.parseInt(scanner.nextLine());
+
+			switch (option) {
+				case 1:
+					System.out.println('1');
+					// gestisciVolo();
+					break;
+				case 2:
+					System.out.println('2');
+					// gestisciSchedulazioneVolo();
+					break;
+				case 3:
+					System.out.println('3');
+					// assegnaPromozione();
+					break;
+				case 4:
+					System.out.println('4');
+					// gestisciSchedaAnagraficaProdotto();
+					break;
+				case 5:
+					System.out.println('5');
+					// effettuaCaricoMagazzino();
+					break;
+				case 6:
+					//code block
+					System.out.println('6');
+					//stampaListaProdottiInSottoscorta();
+					break;
+				case 7: {
+					System.out.println("\nGrazie per aver utilizzato Air-Manager!");
+					System.exit(0);
+				}
 			}
 		}
-		
 	}
-	
+
 	private AirManager() {
-		
+
 		this.voli = new ArrayList<Volo>(); //private
-		//this.prenotazioni = new ArrayList<Prenotazione>(); //private
-		
+		this.prenotazioni = new ArrayList<Prenotazione>(); //private
+		this.prodotti = new ArrayList<Prodotto>(); //private
+
 		//creo voli di esempio e li aggiungo alla lista dei voli
 	    v1 = new Volo("AZ4697");
 	    v2 = new Volo("FR1209");
 	    voli.add(v1);
 	    voli.add(v2);
-	    
+
 	    //creo ricorrenze di esempio e li aggiungo a ciascun volo
-	    
+
 	    //creo prenotazioni di esempio e le aggiungo alla lista delle prenotazioni
-	    /*
 	    p1 = new Prenotazione();
-	    p1.numeroPrenotazione.setNumeroPrenotazione("ABCDEF012345");
-	    p1.data.setData(LocalDate.of(2023, 1, 10));
-	    p1.importo.setImporto(50);
+	    p1.setNumeroPrenotazione("ABCDEF012345");
+	    p1.setData(LocalDate.of(2023, 1, 10));
+	    p1.setImporto((float)50); //capire gestione float
 	    p2 = new Prenotazione();
-	    p2.numeroPrenotazione.setNumeroPrenotazione("GHILMN012345");
-	    p2.data.setData(LocalDate.of(2020, 9, 9));
-	    p2.importo.setImporto(50);
+	    p2.setNumeroPrenotazione("GHILMN012345");
+	    p2.setData(LocalDate.of(2020, 9, 9));
+	    p2.setImporto((float)50); //capire gestione float
 	    prenotazioni.add(p1);
 	    prenotazioni.add(p2);
-	    */
-	    //creo prodotti di esempio e li aggiungo alla lista dei prodotti 
+
+	    //creo prodotti di esempio e li aggiungo alla lista dei prodotti
 	    pr1 = new Prodotto("0001", "Acqua Naturale", 2, 10);
 	    pr2 = new Prodotto("0002", "Biscotti cioccolato", 3, 10); //provare con float
 	    prodotti.add(pr1);
 	    prodotti.add(pr2);
-	    
+
 	}
 
 	public static AirManager getInstance() {
@@ -180,8 +238,8 @@ public class AirManager {
 
 		return airManager;
 	}
-	
-	public static void printMenu(String[] strings) {
+
+	public void printMenu(String[] strings) {
 		for(String string : strings)
 			System.out.println(string);
 		System.out.println("\nEffettua una scelta: "); //MODIFICATO PERCHè QUANDO SCEGLI L'USER NON HA SENSO PARLARE DI OPERAZIONI
@@ -191,16 +249,24 @@ public class AirManager {
 		this.voloCorrente.numeroVolo = numeroVolo;
 	}
 	*/
-	
-	/*
-	public boolean verificaCorrispondenzaEmail(String prenotazioneTrovata, String email) {
-		//
+
+	public Prenotazione getPrenotazione(ArrayList<Prenotazione> prenotazioni, String numeroPrenotazioneInput){
+		for(int i = 0; i < prenotazioni.size(); i++){
+			String numeroPrenotazione = prenotazioni.get(i).numeroPrenotazione;
+			if(numeroPrenotazione.toLowerCase().equals(numeroPrenotazioneInput))
+				return prenotazioni.get(i);
+		}
+		return null;
+	}
+	public boolean verificaCorrispondenzaEmail(String emailPrenotazione, String email) {
+		return true; //non implementato né utilizzato, al momento
 	}
 	
 	public boolean verificaCorrispondenzaDocumento(String prenotazioneTrovata, String codiceDocumento) {
-		
+		return true; //non implementato né utilizzato, al momento
 	}
-	
+
+	/*
 	public boolean verificaCondizioniRimborso(Date dataPrenotazione) {
 		
 	}
