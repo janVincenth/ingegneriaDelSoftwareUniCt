@@ -11,16 +11,22 @@ public class RicorrenzaDiVolo {
 	private Volo voloAssociato;
 	private MappaPostiASedere mappaAssociata;
 	private int durataNominale;
+
+	public float getPrezzo() {
+		return prezzo;
+	}
+
+	private float prezzo;
 	
 	//volo associato va in costruttore?
-	public RicorrenzaDiVolo(LocalDate DataPartenza, LocalDate DataArrivo, LocalTime OraPartenza, 
-		   String aeroportoPartenza, String aeroportoArrivo, Volo voloAssociato, int durataNominale) {
+	public RicorrenzaDiVolo(LocalDate DataPartenza,
+		   String aeroportoPartenza, String aeroportoArrivo, Volo voloAssociato, int durataNominale, float prezzo) {
 		this.dataPartenza = DataPartenza;
-		this.dataArrivo = DataArrivo;
-		this.oraPartenza = OraPartenza;
+		this.aeroportoArrivo=aeroportoArrivo;
 		this.aeroportoPartenza = aeroportoPartenza;
 		this.voloAssociato = voloAssociato;
 		this.durataNominale = durataNominale;
+		this.prezzo=prezzo;
 	}
 	
 	/*public RicorrenzaDiVolo getRicorrenzaPerPreferenze(String partenza, String destinazione, LocalDate data, LocalTime ora) {
