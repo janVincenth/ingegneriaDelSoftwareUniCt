@@ -8,20 +8,51 @@ public class Cliente {
     String codiceFiscale;
 
     Contatti Contatti; //puntatore
+
+    public DocumentoIdentita getDocumentoIdentità() {
+        return documentoIdentità;
+    }
+
+    public void setDocumentoIdentità(DocumentoIdentita documentoIdentità) {
+        this.documentoIdentità = documentoIdentità;
+    }
+
     CartaImbarco CartaImbarco; //puntatore
 
-    public Cliente(String Nome, String Cognome, String codiceFiscale, String email){
+    DocumentoIdentita documentoIdentità;
+    Contatti contatti;
+
+    public Cliente(String Nome, String Cognome, String codiceFiscale, Prenotazione prenotazione){
         scanner= new Scanner(System.in);
         this.Nome=Nome;
         this.Cognome=Cognome;
         this.codiceFiscale=codiceFiscale;
-        Contatti Contatti = new Contatti(email);
-        this.Contatti=Contatti;
+
         CartaImbarco CartaImbarco=new CartaImbarco();
         this.CartaImbarco=CartaImbarco;
+
+        creaDocumento();
+        creaContatti();
         creaCarta();
 
     }
+
+    private void creaContatti() {
+        System.out.println("Quale è il tuo indirizzo e-mail?");
+        String email = scanner.nextLine();
+        contatti=new Contatti(email);
+
+    }
+
+    private void creaDocumento() {
+        System.out.println("Adesso puoi digitare il codice del tuo documento per favore?");
+        String codiceDocumento = scanner.nextLine();
+        System.out.println("Quando scade il tuo documento?"); //vince: al momento non formatto la data, ma poi dovrò formattarla - importante controllare anche se non è scaduto
+        LocalDate scadenzaDocumento = LocalDate.parse(scanner.nextLine());
+        documentoIdentità=new DocumentoIdentita(codiceDocumento,scadenzaDocumento);
+
+    }
+
     private void creaCarta(){
         System.out.println("Grazie "+Nome+", adesso possiamo procedere con il pagamento :)\nAl momento puoi effettuare il pagamento esclusivamente tramite carta, quindi, puoi cortesemente digitare il codice di 16 cifre impresso sulla tua carta di pagamento?");
         String codiceCarta= scanner.nextLine(); //correggere tipo su DCD
@@ -43,7 +74,7 @@ public class Cliente {
         CartaPagamento cartaPagamento = new CartaPagamento(20,circuito,nomeCognomeTitolare,codiceCarta,scadenzaCarta,CVV);
     }
     public Contatti getContatti(){
-        return this.Contatti;
+        return this.contatti;
 
     }
 

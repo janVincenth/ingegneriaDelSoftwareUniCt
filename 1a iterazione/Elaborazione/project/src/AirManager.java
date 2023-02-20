@@ -1,4 +1,6 @@
+import java.time.Duration;
 import java.time.LocalTime;
+import java.time.Period;
 import java.util.*;
 import java.time.LocalDate;
 
@@ -20,7 +22,7 @@ public class AirManager {
     private Prodotto pr1, pr2;
     //private Prenotazione p1, p2;
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws InterruptedException {
         AirManager Sistema = new AirManager();
         Scanner scanner = new Scanner(System.in);
 
@@ -41,7 +43,7 @@ public class AirManager {
 
     } //fine main
 
-    private static void routineCliente(Scanner scanner) {
+    private static void routineCliente(Scanner scanner) throws InterruptedException {
         String[] clientOptions = {"1. Effettuare una prenotazione (Acquisto biglietto)",
                 "2. Cancellare una prenotazione",
                 "3. Effettuare il check-in",
@@ -61,7 +63,7 @@ public class AirManager {
                     break;
                 case 2:
                     System.out.println('2');
-                    // cancellaPrenotazione();
+                    cancellaPrenotazione(scanner);
                     break;
                 case 3:
                     System.out.println('3');
@@ -82,7 +84,12 @@ private static void mostraVoli(){
         System.out.println("Codice IATA: " + demoAeroporto.getKey() + " - Denominazione: " + demoAeroporto.getValue() );
     }
 }
-    private static void effettuaPrenotazione(Scanner scanner) {
+    public static void pause(Scanner scanner){
+
+        System.out.println("Premi un tasto per continuare...");
+        scanner.nextLine();
+    }
+    private static void effettuaPrenotazione(Scanner scanner) throws InterruptedException {
         Prenotazione prenotazione = new Prenotazione();
         prenotazioni = new ArrayList<Prenotazione>();
 
@@ -135,12 +142,10 @@ private static void mostraVoli(){
  * vince implementare un controllo data inserita
  **************************/
 
-		String dataPartenzaGrezza =  scanner.nextLine();
-        int giorno = Integer.parseInt(dataPartenzaGrezza.substring(0,2));
-        int mese= Integer.parseInt(dataPartenzaGrezza.substring(3,5));
-        int anno= Integer.parseInt(dataPartenzaGrezza.substring(6,10));
+		dataPartenza =  LocalDate.parse(scanner.nextLine());
 
-        dataPartenza=LocalDate.of(anno,mese,giorno);
+
+
         System.out.println("\nEcco i voli disponibili: "); //vince: gergo voli usato volutamente
         for(int i=0; i<ricorrenze.size();i++){
             if(ricorrenze.get(i).getAeroportoPartenza().equals(aeroportoPartenza) && ricorrenze.get(i).getAeroportoArrivo().equals(aeroportoDestinazione) && ricorrenze.get(i).getDataPartenza().equals(dataPartenza))
@@ -159,20 +164,76 @@ private static void mostraVoli(){
         System.out.println("Adesso ho bisogno del tuo codice fiscale per favore, puoi digitarlo sotto");
         String codiceFiscale = scanner.nextLine();
 
-        System.out.println("Adesso puoi digitare il codice del tuo documento per favore?");
-        String codiceDocumento = scanner.nextLine();
-        System.out.println("Quando scade il tuo documento?"); //vince: al momento non formatto la data, ma poi dovrò formattarla - importante controllare anche se non è scaduto
-        String scadenzaDocumento = scanner.nextLine();
-        System.out.println("Infine, puoi scrivere il tuo indirizzo e-mail?");
-        String email = scanner.nextLine();
-        Cliente cliente = new Cliente(nome, cognome, codiceFiscale,email);
+
+
+        Cliente cliente = new Cliente(nome, cognome, codiceFiscale, prenotazione); //vince: passo prenotazione perchè è cliente che deve settare su di essa il documento, dopo averlo creato
         prenotazione.setData(LocalDate.now());
+
         prenotazione.setImporto(20F); //20 cast in float F
         prenotazione.setCliente(cliente);
         prenotazione.setNumeroPrenotazione("1000");
-        prenotazioni.add(prenotazione);
-        System.out.println("Il pagamento è andato a buon fine. La prenotazione è stata registrata"); //vince: aggiornare DCD
+        DocumentoIdentita documentoDaAssociareAPrenotazione=cliente.getDocumentoIdentità();
+        prenotazione.setDocumentoIdentita(documentoDaAssociareAPrenotazione);
+        prenotazione.setRicorrenzaDiVolo(ricorrenze.get(scelta)); //scelta corrisponde alla ricorrenza selezionata
 
+        prenotazioni.add(prenotazione);
+        simulAttesa();
+        System.out.println("Il pagamento è andato a buon fine. La prenotazione è stata registrata"); //vince: aggiornare DCD
+        pause(scanner);
+
+    }
+
+    private static void cancellaPrenotazione(Scanner scanner) throws InterruptedException {
+        System.out.println("Bentornato, per effettuare il rimborso ho bisogno di chiederti alcuni dati.");
+        Prenotazione prenotazioneTrovata;
+        String emailSuPrenotazione=null;
+        do{
+        System.out.println("Per iniziare, quale è il numero della prenotazione?");
+        String numeroPrenotazione = scanner.nextLine().toLowerCase();
+        prenotazioneTrovata= getPrenotazione(numeroPrenotazione);
+
+
+            if (prenotazioneTrovata!=null) emailSuPrenotazione=prenotazioneTrovata.getCliente().getContatti().getEmail();
+            else System.out.println("Spiacente, non ho trovato nessuna prenotazione con il codice inserito.");
+        }while(prenotazioneTrovata==null);
+        System.out.println("Quale è l'indirizzo email che hai comunicato quando hai fatto le prenotazione?");
+        String emailComunicataAdesso = scanner.nextLine();
+
+        simulAttesa();
+        if(verificaCorrispondenzaEmail(emailComunicataAdesso,emailSuPrenotazione)) //vince: implementare mail fake
+            System.out.println("L'email inserita risulta verificata. Adesso per favore inserisci il codice del tuo documento di identità");
+        else System.exit(0); //implementare correzione su errore
+        String codiceComunicatoAdesso=scanner.nextLine();
+        String codiceSuPrenotazione= prenotazioneTrovata.getDocumentoIdentita().codiceDocumento;
+        simulAttesa();
+        if(verificaCorrispondenzaDocumento(codiceSuPrenotazione,codiceComunicatoAdesso))
+            System.out.println("Il codice che hai inserito è stato verificato");
+        verificaCondizioniRimborso(prenotazioneTrovata.getRicorrenza().getDataPartenza());
+        pause(scanner);
+
+    }
+
+    private static void verificaCondizioniRimborso(LocalDate dataVolo) {
+        //verificare errore dello steccato
+        if(Period.between(LocalDate.of(2023,06,13),dataVolo).getDays()>=3 && Period.between(LocalDate.of(2023,06,13),dataVolo).getDays()<30)
+            System.out.println("Hai diritto ad un rimborso del 25%, riceverai un voucher tramite email, grazie per la preferenza.");
+        else if(Period.between(LocalDate.of(2023,06,13),dataVolo).getDays()>=30)
+            System.out.println("Hai diritto ad un rimborso del 50%,riceverai un voucher tramite email, grazie per la preferenza.");
+        else System.out.println("Non hai diritto ad alcun rimborso, spiacenti.");
+    }
+
+    public static void simulAttesa() throws InterruptedException {
+        System.out.println("Un attimo, sto verificando...");
+        Thread.currentThread().sleep(3000);
+    }
+    private static boolean verificaCorrispondenzaDocumento(String documentoPrenotazione, String documentoAdesso){
+        if(documentoAdesso.equals(documentoPrenotazione)) return true;
+        return false;
+    }
+
+    private static boolean verificaCorrispondenzaEmail(String emailPrenotazione, String emailAdesso){
+        if(emailPrenotazione.equals(emailAdesso)) return true;
+        return false;
 
     }
 
@@ -249,6 +310,15 @@ private static void mostraVoli(){
 
     }
 
+
+    private static Prenotazione getPrenotazione(String numeroPrenotazioneInput){
+        for(int i = 0; i < prenotazioni.size(); i++){
+            String numeroPrenotazione = prenotazioni.get(i).numeroPrenotazione;
+            if(numeroPrenotazione.toLowerCase().equals(numeroPrenotazioneInput))
+                return prenotazioni.get(i);
+        }
+        return null;
+    }
     public static AirManager getInstance() {
         if (airManager == null)
             airManager = new AirManager();
