@@ -67,7 +67,7 @@ public class AirManager {
                     break;
                 case 3:
                     System.out.println('3');
-                    // effettuaCheckIn();
+                    effettuaCheckIn();
                     break;
                 case 4: {
                     System.out.println("\nGrazie per aver utilizzato Air-Manager!");
@@ -226,6 +226,72 @@ private static void mostraVoli(){
         System.out.println("Un attimo, sto verificando...");
         Thread.currentThread().sleep(3000);
     }
+	
+	private static void effettuaCheckIn(Scanner scanner) {
+		System.out.println("Benvenuto nella procedura di check-in! Si prega di inserire il numero della prenotazione per cui effettuare il check-in");
+		//cliente inserisce numeroPrenotazione
+		String numeroPrenotazioneInput = scanner.nextLine().toLowerCase();
+
+		Prenotazione p = getPrenotazione(prenotazioni, numeroPrenotazioneInput);
+		if (p == null) //al momento non è data la possibilità di provare più volte consecutivamente, per semplicità
+			System.out.println("Non è stata trovata alcuna prenotazione avente il numero prenotazione inserito.");
+		else {
+			System.out.println("\nÈ stata trovata una prenotazione avente il seguente codice: " + numeroPrenotazioneInput.toUpperCase());
+			Cliente cl = p.getCliente();
+			if(cl.getCartaImbarco().getNumeroCarta() != 0){
+				System.out.println("\nÈ già stato effettuato il check-in per questa prenotazione. Air-Manager augura buon viaggio!");
+			}
+			else {
+				System.out.print("\nSi prega di inserire il codice del proprio documento d'identità:");
+				String codiceDocumento = scanner.nextLine().toLowerCase();
+				String codiceDocumentoPrenotazione = p.getDocumentoIdentita().getCodiceDocumento();
+				//if(!verificaCorrispondenzaDocumento(codiceDocumentoPrenotazione, codiceDocumento)) //differente da metodo DCD
+				//per la corrente iterazione (Iterazione 1) non si sta ancora considerando il security check
+				//if(codiceDocumentoPrenotazione.equals(codiceDocumento)) //utilizzare questa una volta integrato il codice di Vincenth
+				if ("AX00".equals(codiceDocumento))
+					System.out.println("Il codice documento fornito non corrisponde a quello associato alla prenotazione indicata.");
+				else
+					System.out.println("\nCodice documento valido. Si prega di inserire la mail utilizzata in fase di prenotazione:");
+				String email = scanner.nextLine().toLowerCase();
+				String emailPrenotazione = cl.getContatti().getEmail();
+				//if(!verificaCorrispondenzaEmail(emailPrenotazione, email)) //differente da metodo in DCD
+				//if(!emailPrenotazione.equals(email)) //utilizzare questa una volta integrato il codice di Vincenth
+				if ("a@hotmail.com".equals(email))
+					System.out.println("L'email fornita non corrisponde a quella associata alla prenotazione indicata.");
+				else System.out.println("\nEmail valida.");
+
+				//determino posto da proporre al cliente
+				MappaPostiASedere mappaPrenotazione = p.getRicorrenza().getMappaAssociata();
+
+				if (mappaPrenotazione.getNumeroPostiDisponibili() > 0) { //è ancora presente almeno un posto a sedere libero (no overbooking)
+					short numeroPostoProposto = mappaPrenotazione.definisciPosto();
+
+					System.out.println("Air-Manager ti propone il seguente posto a sedere: " + (short)(numeroPostoProposto+1) + "\nAccetti?\n1. Sì\n2. No");
+					int option = scanner.nextInt();
+					if (option == 1) { // scenario principale
+						mappaPrenotazione.setPostiOccupati(numeroPostoProposto);
+						System.out.println("\nBene, viaggerai al posto numero " + (short)(numeroPostoProposto+1) + "\n");
+
+						int numeroCartaImbarco = (int)(Math.random() * 10000000); // generatore casuale di numeroCartaImbarco
+
+						String nome = cl.getNome();
+						String cognome = cl.getCognome();
+						CartaImbarco cartaImbarco = cl.getCartaImbarco();
+
+						aggiornaCartaImbarcoCliente(cartaImbarco, nome, cognome, numeroCartaImbarco, numeroPostoProposto);
+						printCartaDiImbarco(nome, cognome, cartaImbarco.getNumeroCarta(), cartaImbarco.getPostoASedere());
+						pause(scanner);
+					} else if (option == 2) {
+						System.out.println("Posto rifiutato (scenario altenrativo non ancora implementato nella corrente iterazione (iterazione 1)");
+					} else System.out.println("Opzione non valida");
+				}
+				// overbooking
+				else
+					System.out.println("Non sono più presenti posti a sedere disponibili per questo volo, pertanto non è possibile portare a termine il check-in e generare una carta d’imbarco. Si prega di recarsi al box assistenza");
+			}
+		}
+	}
+	
     private static boolean verificaCorrispondenzaDocumento(String documentoPrenotazione, String documentoAdesso){
         if(documentoAdesso.equals(documentoPrenotazione)) return true;
         return false;

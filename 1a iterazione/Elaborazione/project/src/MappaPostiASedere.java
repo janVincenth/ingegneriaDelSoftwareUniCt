@@ -2,55 +2,59 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class MappaPostiASedere {
-	private Map<Short, Boolean> postiOccupati;
+	private HashMap<Short, Boolean> postiOccupati = new HashMap<Short, Boolean>();
 	private short numeroPostiDisponibili;
 	
 	public MappaPostiASedere(short numeroPostiDisponibili, boolean libero) {
+		this.numeroPostiDisponibili = numeroPostiDisponibili;
 		for(int i=0; i < this.numeroPostiDisponibili; i++) {
-			this.postiOccupati = new HashMap<>();
 			postiOccupati.put((short)i, libero); //tutti i posti a sedere sono inizialmente liberi
 		}
-		this.numeroPostiDisponibili = numeroPostiDisponibili;
 	}
 
 	public short definisciPosto() {
-		//dove viene fatto il controllo numeroPostiDisponibili > 0?
-		
 		int numeroTotalePosti = this.postiOccupati.size();
+		short numeroPostoProposto = (short)(numeroTotalePosti+1);
 		
 		boolean postoTrovato = false;
-		for(int i=(numeroTotalePosti/3*2-1); i < numeroTotalePosti; i++) {
-			if(postiOccupati.get(i).equals(false)){
-				postoTrovato = true;	
-				return (short) i;
+		for(int i=(numeroTotalePosti/3*2); i < numeroTotalePosti; i++) { //posti economy
+			if(this.postiOccupati.get((short)i).equals(false)){
+				postoTrovato = true;
+				numeroPostoProposto  = (short) i;
+				break;
 			}
 		}
 		if(!postoTrovato) {
-			for(int i = numeroTotalePosti/3-1; i < numeroTotalePosti/3*2; i++) {
-				if(postiOccupati.get(i).equals(false)){
-					postoTrovato = true;	
-					return (short) i;
+			for(int i = numeroTotalePosti/3; i < numeroTotalePosti/3*2; i++) { //posti in seconda classe
+				if(postiOccupati.get((short)i).equals(false)){
+					postoTrovato = true;
+					numeroPostoProposto  = (short) i;
+					break;
 				}
 			}
 		}
-		for(int i = 0; i < numeroTotalePosti/3; i++) {
-			if(postiOccupati.get(i).equals(false)){
-				postoTrovato = true;	
-				return (short) i;
+		if(!postoTrovato){
+			for(int i = 0; i < numeroTotalePosti/3; i++) {
+				if(postiOccupati.get((short)i).equals(false)){ //posti in prima classe
+					postoTrovato = true;
+					numeroPostoProposto  = (short) i;
+					break;
+				}
 			}
 		}
-		return 1;
+
+		return numeroPostoProposto;
 	}
 	
-	public Map<Short, Boolean> getPostiOccupati() {
+	public HashMap<Short, Boolean> getPostiOccupati() {
 		return postiOccupati;
 	}
 	
-	/*
-	public void setPostiOccupati(Map<Short, Boolean> postiOccupati) {
-		this.postiOccupati = postiOccupati;
+	public void setPostiOccupati(Short numeroPostoProposto) {
+		this.postiOccupati.put(numeroPostoProposto, true);
+		this.numeroPostiDisponibili--;
 	}
-	*/
+
 
 	public short getNumeroPostiDisponibili() {
 		return numeroPostiDisponibili;
