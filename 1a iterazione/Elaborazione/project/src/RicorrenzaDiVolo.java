@@ -107,4 +107,8 @@ public class RicorrenzaDiVolo {
 	public void setDurataNominale(int durataNominale) {
 		this.durataNominale = durataNominale;
 	}
+
+	public void setMappaAssociata(MappaPostiASedere mappaAssociata){
+		this.mappaAssociata=mappaAssociata;
+	}
 }
