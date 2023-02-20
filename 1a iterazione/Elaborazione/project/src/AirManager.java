@@ -86,7 +86,7 @@ private static void mostraVoli(){
 }
     public static void pause(Scanner scanner){
 
-        System.out.println("Premi un tasto per continuare...");
+        System.out.println("Premi INVIO per continuare...");
         scanner.nextLine();
     }
     private static void effettuaPrenotazione(Scanner scanner) throws InterruptedException {
