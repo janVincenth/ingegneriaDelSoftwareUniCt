@@ -1,10 +1,11 @@
+import java.time.LocalDate;
 import java.util.Date;
 
 public class DocumentoIdentita {
     String codiceDocumento;
-    Date scadenza;
+    LocalDate scadenza;
 
-    public DocumentoIdentita(String codiceDocumento, Date scadenza){
+    public DocumentoIdentita(String codiceDocumento, LocalDate scadenza){
         this.codiceDocumento=codiceDocumento;
         this.scadenza=scadenza;
 
