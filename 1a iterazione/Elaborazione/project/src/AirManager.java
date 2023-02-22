@@ -228,12 +228,17 @@ private static void mostraVoli(){
         if(verificaCorrispondenzaDocumento(codiceSuPrenotazione,codiceComunicatoAdesso))
             System.out.println("Il codice che hai inserito è stato verificato");
         verificaCondizioniRimborso(prenotazioneTrovata.getRicorrenza().getDataPartenza());
-        for(int i=0;i<prenotazioni.size();i++){
-            if(prenotazioni.get(i).getNumeroPrenotazione().equals(prenotazioneTrovata.getNumeroPrenotazione()))
-                prenotazioni.remove(i);
-        }
+        cancellazioneEffettivaPrenotazione(prenotazioneTrovata,prenotazioni);
+
         pause(scanner);
 
+    }
+
+    private static void cancellazioneEffettivaPrenotazione(Prenotazione prenotazioneDaCancellare, List<Prenotazione> listaPrenotazioni){
+        for(int i=0;i<prenotazioni.size();i++){
+            if(prenotazioni.get(i).getNumeroPrenotazione().equals(prenotazioneDaCancellare.getNumeroPrenotazione()))
+                prenotazioni.remove(i);
+        }
     }
 
     private static void verificaCondizioniRimborso(LocalDate dataVolo) {
