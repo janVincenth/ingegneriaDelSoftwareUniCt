@@ -24,7 +24,7 @@ public class AirManager {
 
     public static void main(String[] args) throws InterruptedException {
         init();
-        AirManager Sistema = new AirManager();
+        AirManager airManager = getInstance();
         Scanner scanner = new Scanner(System.in);
 
         System.out.println("Benvenuto in Air-Manager!\nStai utilizzando il software come impiegato o come cliente?");
@@ -174,7 +174,7 @@ private static void mostraVoli(){
         //vince: ho appena mostrato la lista dei voli che matchano le preferenze, adesso devo fare selezionare il volo di preferenza.
         // nb vince: l'indice delle opzioni di volo non parte da 1
         System.out.println("Effettua una scelta ");
-        int scelta=Integer.parseInt(scanner.nextLine());
+        int ricorrenzaScelta=Integer.parseInt(scanner.nextLine());
 
         System.out.println("Fantastico! Andiamo avanti, adesso ho bisogno di sapere come ti chiami?");
         String nome = scanner.nextLine();
@@ -188,12 +188,12 @@ private static void mostraVoli(){
         Cliente cliente = new Cliente(nome, cognome, codiceFiscale, prenotazione); //vince: passo prenotazione perchè è cliente che deve settare su di essa il documento, dopo averlo creato
         prenotazione.setData(LocalDate.now());
 
-        prenotazione.setImporto(20F); //20 cast in float F
+        prenotazione.setImporto(ricorrenze.get(ricorrenzaScelta).getPrezzo()); //20 cast in float F
         prenotazione.setCliente(cliente);
         prenotazione.setNumeroPrenotazione("1000");
         DocumentoIdentita documentoDaAssociareAPrenotazione=cliente.getDocumentoIdentità();
         prenotazione.setDocumentoIdentita(documentoDaAssociareAPrenotazione);
-        prenotazione.setRicorrenzaDiVolo(ricorrenze.get(scelta)); //scelta corrisponde alla ricorrenza selezionata
+        prenotazione.setRicorrenzaDiVolo(ricorrenze.get(ricorrenzaScelta)); //scelta corrisponde alla ricorrenza selezionata
 
         prenotazioni.add(prenotazione);
         simulAttesa();
@@ -227,27 +227,40 @@ private static void mostraVoli(){
         simulAttesa();
         if(verificaCorrispondenzaDocumento(codiceSuPrenotazione,codiceComunicatoAdesso))
             System.out.println("Il codice che hai inserito è stato verificato");
-        verificaCondizioniRimborso(prenotazioneTrovata.getRicorrenza().getDataPartenza());
+        int rimborsoPercentuale = verificaCondizioniRimborso(prenotazioneTrovata.getRicorrenza().getDataPartenza());
         cancellazioneEffettivaPrenotazione(prenotazioneTrovata,prenotazioni);
-
+        float importoRimborsato = calcolaImportoRimborsato(prenotazioneTrovata.getImporto(), rimborsoPercentuale);
+        Voucher voucher = new Voucher(importoRimborsato);
+        System.out.println("Importo rimborsato "+ importoRimborsato);
         pause(scanner);
 
     }
 
-    private static void cancellazioneEffettivaPrenotazione(Prenotazione prenotazioneDaCancellare, List<Prenotazione> listaPrenotazioni){
-        for(int i=0;i<prenotazioni.size();i++){
-            if(prenotazioni.get(i).getNumeroPrenotazione().equals(prenotazioneDaCancellare.getNumeroPrenotazione()))
-                prenotazioni.remove(i);
+    public static float calcolaImportoRimborsato(float importo, int sconto) {
+
+        return importo*((float)sconto/100);
+    }
+
+
+    public static void cancellazioneEffettivaPrenotazione(Prenotazione prenotazioneDaCancellare, List<Prenotazione> listaPrenotazioni){
+        for(int i=0;i<listaPrenotazioni.size();i++){
+            if(listaPrenotazioni.get(i).getNumeroPrenotazione().equals(prenotazioneDaCancellare.getNumeroPrenotazione()))
+                listaPrenotazioni.remove(i);
         }
     }
 
-    private static void verificaCondizioniRimborso(LocalDate dataVolo) {
+    public List<Prenotazione> getPrenotazioni(){
+        return prenotazioni;
+    }
+
+    public static int verificaCondizioniRimborso(LocalDate dataVolo) {
         //verificare errore dello steccato
-        if(Period.between(LocalDate.of(2023,06,13),dataVolo).getDays()>=3 && Period.between(LocalDate.of(2023,06,13),dataVolo).getDays()<30)
-            System.out.println("Hai diritto ad un rimborso del 25%, riceverai un voucher tramite email, grazie per la preferenza.");
-        else if(Period.between(LocalDate.of(2023,06,13),dataVolo).getDays()>=30)
-            System.out.println("Hai diritto ad un rimborso del 50%,riceverai un voucher tramite email, grazie per la preferenza.");
-        else System.out.println("Non hai diritto ad alcun rimborso, spiacenti.");
+
+        if(Period.between(LocalDate.now(),dataVolo).getDays()>=3 && Period.between(LocalDate.now(),dataVolo).getDays()<30){
+            System.out.println("Hai diritto ad un rimborso del 25%, riceverai un voucher tramite email, grazie per la preferenza."); return 25;}
+        else if(Period.between(LocalDate.now(),dataVolo).getDays()>=30){
+            System.out.println("Hai diritto ad un rimborso del 50%,riceverai un voucher tramite email, grazie per la preferenza."); return 50;}
+        else{ System.out.println("Non hai diritto ad alcun rimborso, spiacenti."); return 0;}
     }
 
     public static void simulAttesa() throws InterruptedException {

@@ -4,7 +4,7 @@ public class Prenotazione {
 
     String numeroPrenotazione;
     LocalDate data;
-    Float importo;
+    float importo;
 
     Cliente cliente; //puntatore
     DocumentoIdentita documentoIdentita; // puntatore
@@ -57,7 +57,7 @@ public class Prenotazione {
         return numeroPrenotazione;
     }
 
-    public Float getImporto() {
+    public float getImporto() {
         return importo;
     }
 

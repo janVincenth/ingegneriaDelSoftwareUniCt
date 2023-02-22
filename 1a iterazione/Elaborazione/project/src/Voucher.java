@@ -4,8 +4,13 @@ public class Voucher {
     String voucherID;
     Date scadenzaVoucher;
 
-    public Voucher(){
-        //id random
+    float importo;
+
+    public Voucher(float importoRimborsato){
+        this.importo=importoRimborsato;
+        voucherID= String.valueOf(((Math.random() * 10000000)));
         //scadenza?
     }
+
+
 }
