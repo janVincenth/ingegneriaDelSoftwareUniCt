@@ -1,5 +1,4 @@
 import java.time.Duration;
-import java.time.LocalTime;
 import java.time.Period;
 import java.util.*;
 import java.time.LocalDate;
@@ -11,15 +10,12 @@ public class AirManager {
     //collezioni
     private static ArrayList<Volo> voli;
     private static ArrayList<RicorrenzaDiVolo> ricorrenze;
-    //private ArrayList<Prenotazione> prenotazioni;
-    private ArrayList<Prodotto> prodotti;
     private static ArrayList<Prenotazione> prenotazioni;
-
+    private static Map <String, Voucher> voucherEmessi;
     private static Map<String, String> aeroporti;
     //istanze
     //
     private static Volo v1, v2, v3, voloCorrente;
-    private Prodotto pr1, pr2;
     //private Prenotazione p1, p2;
 
     public static void main(String[] args) throws InterruptedException {
@@ -59,15 +55,12 @@ public class AirManager {
 
             switch(option) {
                 case 1:
-                    System.out.println('1');
                     effettuaPrenotazione(scanner);
                     break;
                 case 2:
-                    System.out.println('2');
                     cancellaPrenotazione(scanner);
                     break;
                 case 3:
-                    System.out.println('3');
                     effettuaCheckIn(scanner);
                     break;
                 case 4: {
@@ -105,8 +98,6 @@ private static void mostraVoli(){
         String aeroportoDestinazione;
         LocalDate dataPartenza;
 
-
-
         //INIZIALIZZO LA COLLEZIONE CON AEROPORTI PRE-SELEZIONATI
 
         //INIZIALIZZO LA COLLEZIONE CON RICORRENZE PRE-SCELTE
@@ -118,12 +109,13 @@ private static void mostraVoli(){
                 ricorrenza1v3= new RicorrenzaDiVolo(LocalDate.of(2023,06,14),"FCO","FLR",voli.get(2),20,40F),
                 ricorrenza2v3= new RicorrenzaDiVolo(LocalDate.of(2023,06,15),"FCO","CTA",voli.get(2),21,38F);
 
-        MappaPostiASedere mappaAssociata1 = new MappaPostiASedere((short)90, false);
-        MappaPostiASedere mappaAssociata2 = new MappaPostiASedere((short)90, false);
-        MappaPostiASedere mappaAssociata3 = new MappaPostiASedere((short)90, false);
-        MappaPostiASedere mappaAssociata4 = new MappaPostiASedere((short)90, false);
-        MappaPostiASedere mappaAssociata5 = new MappaPostiASedere((short)90, false);
-        MappaPostiASedere mappaAssociata6 = new MappaPostiASedere((short)90, false);
+        final short numeroPostiDisponibili = (short)90;
+        MappaPostiASedere mappaAssociata1 = new MappaPostiASedere(numeroPostiDisponibili, false);
+        MappaPostiASedere mappaAssociata2 = new MappaPostiASedere(numeroPostiDisponibili, false);
+        MappaPostiASedere mappaAssociata3 = new MappaPostiASedere(numeroPostiDisponibili, false);
+        MappaPostiASedere mappaAssociata4 = new MappaPostiASedere(numeroPostiDisponibili, false);
+        MappaPostiASedere mappaAssociata5 = new MappaPostiASedere(numeroPostiDisponibili, false);
+        MappaPostiASedere mappaAssociata6 = new MappaPostiASedere(numeroPostiDisponibili, false);
         ricorrenza1v1.setMappaAssociata(mappaAssociata1);
         ricorrenza2v1.setMappaAssociata(mappaAssociata2);
         ricorrenza1v2.setMappaAssociata(mappaAssociata3);
@@ -137,7 +129,6 @@ private static void mostraVoli(){
         ricorrenze.add(ricorrenza2v2);
         ricorrenze.add(ricorrenza1v3);
         ricorrenze.add(ricorrenza2v3);
-
 
 
         System.out.println("\nPer favore, scegli un aeroporto di partenza digitando il codice IATA corrispondente:"); //da implementare una lista di aeroporti da cui scegliere tramite elenco puntato
@@ -156,7 +147,7 @@ private static void mostraVoli(){
 
         mostraVoli();
         aeroportoDestinazione= scanner.nextLine().toUpperCase();
-        System.out.println("\nOttimo, il tuo viaggio inizierà da " +aeroporti.get(aeroportoPartenza) +"e finirà a "+aeroporti.get(aeroportoDestinazione)+ "\nChe giorno vuoi partire? Per favore, inserisci la data di partenza nel formato gg-mm-aaaa"); //come sopra
+        System.out.println("\nOttimo, il tuo viaggio inizierà da " +aeroporti.get(aeroportoPartenza) +"e finirà a "+aeroporti.get(aeroportoDestinazione)+ "\nIn che giorno vuoi partire? Per favore, inserisci la data di partenza nel formato gg-mm-aaaa"); //come sopra
 
 /**************************
  * vince implementare un controllo data inserita
@@ -215,26 +206,36 @@ private static void mostraVoli(){
 
             if (prenotazioneTrovata!=null) emailSuPrenotazione=prenotazioneTrovata.getCliente().getContatti().getEmail();
             else System.out.println("Spiacente, non ho trovato nessuna prenotazione con il codice inserito.");
-        }while(prenotazioneTrovata==null);
-        System.out.println("Quale è l'indirizzo email che hai comunicato quando hai fatto le prenotazione?");
-        String emailComunicataAdesso = scanner.nextLine();
+        } while(prenotazioneTrovata==null);
 
-        simulAttesa();
-        if(verificaCorrispondenzaEmail(emailComunicataAdesso,emailSuPrenotazione)) //vince: implementare mail fake
-            System.out.println("L'email inserita risulta verificata. Adesso per favore inserisci il codice del tuo documento di identità");
-        else System.exit(0); //implementare correzione su errore
-        String codiceComunicatoAdesso=scanner.nextLine();
-        String codiceSuPrenotazione= prenotazioneTrovata.getDocumentoIdentita().codiceDocumento;
-        simulAttesa();
-        if(verificaCorrispondenzaDocumento(codiceSuPrenotazione,codiceComunicatoAdesso))
-            System.out.println("Il codice che hai inserito è stato verificato");
-        int rimborsoPercentuale = verificaCondizioniRimborso(prenotazioneTrovata.getRicorrenza().getDataPartenza());
-        cancellazioneEffettivaPrenotazione(prenotazioneTrovata,prenotazioni);
-        float importoRimborsato = calcolaImportoRimborsato(prenotazioneTrovata.getImporto(), rimborsoPercentuale);
-        Voucher voucher = new Voucher(importoRimborsato);
-        System.out.println("Importo rimborsato "+ importoRimborsato);
-        pause(scanner);
+        String numeroCartaImbarco = prenotazioneTrovata.getCliente().getCartaImbarco().getNumeroCarta();
+        if(numeroCartaImbarco.equals(String.valueOf(0))) { //non è stato ancora effettuato il check-in per questa prenotazione
+            System.out.println("Non è ancora stato effettuato il check-in per questa prenotazione, pertanto è possibile procedere con la cancellazione.");
+            System.out.println("Qual è l'indirizzo email che hai comunicato quando hai fatto le prenotazione?");
+            String emailComunicataAdesso = scanner.nextLine();
 
+            simulAttesa();
+            if (verificaCorrispondenzaEmail(emailComunicataAdesso, emailSuPrenotazione)) //vince: implementare mail fake
+                System.out.println("L'email inserita risulta verificata. Adesso per favore inserisci il codice del tuo documento di identità");
+            else System.exit(0); //implementare correzione su errore
+            String codiceComunicatoAdesso = scanner.nextLine();
+            String codiceSuPrenotazione = prenotazioneTrovata.getDocumentoIdentita().codiceDocumento;
+            simulAttesa();
+            if (verificaCorrispondenzaDocumento(codiceSuPrenotazione, codiceComunicatoAdesso))
+                System.out.println("Il codice che hai inserito è stato verificato");
+            int rimborsoPercentuale = verificaCondizioniRimborso(prenotazioneTrovata.getRicorrenza().getDataPartenza());
+            cancellazioneEffettivaPrenotazione(prenotazioneTrovata, prenotazioni);
+            float importoRimborsato = calcolaImportoRimborsato(prenotazioneTrovata.getImporto(), rimborsoPercentuale);
+            if (importoRimborsato > 0){
+                Voucher voucher = new Voucher(importoRimborsato);
+                voucherEmessi.put(voucher.getVoucherID(), voucher);
+            }
+            System.out.println("Importo rimborsato: €" + importoRimborsato);
+            pause(scanner);
+        }
+        else { //è giù stato effettuato il check-in per questa prenotazione
+            System.out.println("È già stato effettuato il check-in per questa prenotazione, pertanto non può essere cancellata.");
+        }
     }
 
     public static float calcolaImportoRimborsato(float importo, int sconto) {
@@ -247,6 +248,7 @@ private static void mostraVoli(){
         for(int i=0;i<listaPrenotazioni.size();i++){
             if(listaPrenotazioni.get(i).getNumeroPrenotazione().equals(prenotazioneDaCancellare.getNumeroPrenotazione()))
                 listaPrenotazioni.remove(i);
+                System.out.println("\nLa prenotazione è stata cancellata con successo.");
         }
     }
 
@@ -271,95 +273,86 @@ private static void mostraVoli(){
 	
 	private static void effettuaCheckIn(Scanner scanner) {
 		System.out.println("Benvenuto nella procedura di check-in! Si prega di inserire il numero della prenotazione per cui effettuare il check-in");
-		//cliente inserisce numeroPrenotazione
 		String numeroPrenotazioneInput = scanner.nextLine().toLowerCase();
 
 		Prenotazione p = getPrenotazione(numeroPrenotazioneInput);
 		if (p == null) //al momento non è data la possibilità di provare più volte consecutivamente, per semplicità
 			System.out.println("Non è stata trovata alcuna prenotazione avente il numero prenotazione inserito.");
 		else {
-			System.out.println("\nÈ stata trovata una prenotazione avente il seguente codice: " + numeroPrenotazioneInput.toUpperCase());
+			System.out.println("È stata trovata una prenotazione avente il seguente codice: " + numeroPrenotazioneInput.toUpperCase());
 			Cliente cl = p.getCliente();
-			if(cl.getCartaImbarco().getNumeroCarta() != 0){
-				System.out.println("\nÈ già stato effettuato il check-in per questa prenotazione. Air-Manager augura buon viaggio!");
+			if(!cl.getCartaImbarco().getNumeroCarta().equals(String.valueOf(0))){
+				System.out.println("È già stato effettuato il check-in per questa prenotazione. Air-Manager augura buon viaggio!");
 			}
-			else {
-                System.out.print("\nSi prega di inserire il codice del proprio documento d'identità:");
+			else { // check-in non ancora effettuato
+                System.out.print("\nSi prega di inserire il codice del proprio documento d'identità: \n");
                 String codiceDocumento = scanner.nextLine().toLowerCase();
-                String codiceDocumentoPrenotazione = p.getDocumentoIdentita().getCodiceDocumento();
-                //if(!verificaCorrispondenzaDocumento(codiceDocumentoPrenotazione, codiceDocumento)) //differente da metodo DCD
+                String codiceDocumentoPrenotazione = p.getDocumentoIdentita().getCodiceDocumento().toLowerCase();
                 //per la corrente iterazione (Iterazione 1) non si sta ancora considerando il security check
-                System.out.println(codiceDocumentoPrenotazione + "" + codiceDocumento);
-                if (!codiceDocumentoPrenotazione.equals(codiceDocumento))
+                //System.out.println(codiceDocumentoPrenotazione + "" + codiceDocumento);
+                //if (!codiceDocumentoPrenotazione.equals(codiceDocumento))
+                if (!verificaCorrispondenzaDocumento(codiceDocumentoPrenotazione, codiceDocumento)) {
                     System.out.println("Il codice documento fornito non corrisponde a quello associato alla prenotazione indicata.");
-                else
-                    System.out.println("\nCodice documento valido. Si prega di inserire la mail utilizzata in fase di prenotazione:");
-                String email = scanner.nextLine().toLowerCase();
-                String emailPrenotazione = cl.getContatti().getEmail();
-                //if(!verificaCorrispondenzaEmail(emailPrenotazione, email)) //differente da metodo in DCD
-                if (!emailPrenotazione.equals(email)) //utilizzare questa una volta integrato il codice di Vincenth
-                    //if ("a@hotmail.com".equals(email))
-                    System.out.println("L'email fornita non corrisponde a quella associata alla prenotazione indicata.");
-                else {
-                    System.out.println("\nEmail valida.");
-
-                    //determino posto da proporre al cliente
-                    MappaPostiASedere mappaPrenotazione = p.getRicorrenza().getMappaAssociata();
-
-                    if (mappaPrenotazione.getNumeroPostiDisponibili() > 0) { //è ancora presente almeno un posto a sedere libero (no overbooking)
-                        short numeroPostoProposto = mappaPrenotazione.definisciPosto();
-
-                        System.out.println("Air-Manager ti propone il seguente posto a sedere: " + (short) (numeroPostoProposto + 1) + "\nAccetti?\n1. Sì\n2. No");
-                        int option = scanner.nextInt();
-                        if (option == 1) { // scenario principale
-                            mappaPrenotazione.setPostiOccupati(numeroPostoProposto);
-                            System.out.println("\nBene, viaggerai al posto numero " + (short) (numeroPostoProposto + 1) + "\n");
-
-                            int numeroCartaImbarco = (int) (Math.random() * 10000000); // generatore casuale di numeroCartaImbarco
-
-                            String nome = cl.getNome();
-                            String cognome = cl.getCognome();
-                            CartaImbarco cartaImbarco = cl.getCartaImbarco();
-
-                            aggiornaCartaImbarcoCliente(cartaImbarco, nome, cognome, numeroCartaImbarco, numeroPostoProposto);
-                            printCartaDiImbarco(nome, cognome, cartaImbarco.getNumeroCarta(), cartaImbarco.getPostoASedere());
-                            pause(scanner);
-                        } else if (option == 2) {
-                            System.out.println("Posto rifiutato (scenario altenrativo non ancora implementato nella corrente iterazione (iterazione 1)");
-                        } else System.out.println("Opzione non valida");
-                    }
-                    // overbooking
-                    else
-                        System.out.println("Non sono più presenti posti a sedere disponibili per questo volo, pertanto non è possibile portare a termine il check-in e generare una carta d’imbarco. Si prega di recarsi al box assistenza");
                 }
+                else {
+                    System.out.println("Codice documento valido. Si prega di inserire la mail utilizzata in fase di prenotazione:");
+                    String email = scanner.nextLine().toLowerCase();
+                    String emailPrenotazione = cl.getContatti().getEmail().toLowerCase();
+                    //if (!emailPrenotazione.equals(email)) {
+                    if (!verificaCorrispondenzaEmail(emailPrenotazione, email)) {
+                        System.out.println("L'email fornita non corrisponde a quella associata alla prenotazione indicata.");
+                    }
+                    else {
+                        System.out.println("Email valida.");
+
+                        //determino posto da proporre al cliente
+                        MappaPostiASedere mappaPrenotazione = p.getRicorrenza().getMappaAssociata();
+
+                        if (mappaPrenotazione.getNumeroPostiDisponibili() > 0) { //è ancora presente almeno un posto a sedere libero (no overbooking)
+                            short numeroPostoProposto = mappaPrenotazione.definisciPosto();
+
+                            System.out.println("\nAir-Manager ti propone il seguente posto a sedere: " + (short) (numeroPostoProposto + 1) + "\nAccetti?\n1. Sì\n2. No");
+                            int option = scanner.nextInt();
+                            if (option == 1) { // scenario principale
+                                mappaPrenotazione.setPostiOccupati(numeroPostoProposto);
+                                System.out.println("\nBene, viaggerai al posto numero " + (short) (numeroPostoProposto + 1) + "\n");
+
+                                String numeroCartaImbarco = String.valueOf((int) (Math.random() * 10000000)); // generatore casuale di numeroCartaImbarco
+                                String nome = cl.getNome();
+                                String cognome = cl.getCognome();
+                                CartaImbarco cartaImbarco = cl.getCartaImbarco();
+
+                                aggiornaCartaImbarcoCliente(cartaImbarco, nome, cognome, numeroCartaImbarco, numeroPostoProposto);
+                                System.out.println(cartaImbarco); //mostro a schermo i dettagli della carta d'imbarco emessa
+                                pause(scanner);
+                            } else if (option == 2) {
+                                System.out.println("Posto rifiutato (scenario alternativo non ancora implementato nella corrente iterazione (iterazione 1)");
+                            } else System.out.println("Opzione non valida");
+                        }
+                        // non è più presente almeno un posto a sedere libero (overbooking)
+                        else
+                            System.out.println("Non sono più presenti posti a sedere disponibili per questo volo, pertanto non è possibile portare a termine il check-in e generare una carta d’imbarco. Si prega di recarsi al box assistenza");
+                    } // chiusura else email valida
+                } // chiusura else codice documento valido
             }
         }
 	}
 
-    private static void aggiornaCartaImbarcoCliente(CartaImbarco cartaImbarco, String nome, String cognome, int numeroCartaImbarco, short numeroPostoProposto) {
-        cartaImbarco.setNome(nome);
-        cartaImbarco.setCognome(cognome);
+    private static void aggiornaCartaImbarcoCliente(CartaImbarco cartaImbarco, String nome, String cognome, String numeroCartaImbarco, short numeroPostoProposto) {
+        cartaImbarco.getCliente().setNome(nome);
+        cartaImbarco.getCliente().setCognome(cognome);
         cartaImbarco.setNumeroCarta(numeroCartaImbarco);
         cartaImbarco.setPostoASedere(numeroPostoProposto);
     }
 
-    private static void printCartaDiImbarco(String nome, String cognome, int numeroCartaImbarco, short postoASedere) {
-        System.out.println("Ecco la tua carta d'imbarco: ");
-        System.out.println("Nome: " + nome);
-        System.out.println("Cognome: " + cognome);
-        System.out.println("Numero carta d'imbarco: " + numeroCartaImbarco);
-        System.out.println("Posto a sedere: " + (short)(postoASedere+1));
-        System.out.println("\nGrazie per aver utilizzato il servizio di check-in fai da te offerto da Air-Manager! Buon viaggio!\n");
-    }
-	
-    private static boolean verificaCorrispondenzaDocumento(String documentoPrenotazione, String documentoAdesso){
-        if(documentoAdesso.equals(documentoPrenotazione)) return true;
-        return false;
+    private static boolean verificaCorrispondenzaDocumento(String documentoPrenotazione, String documentoInput){
+        if(documentoInput.equals(documentoPrenotazione)) return true;
+        else return false;
     }
 
-    private static boolean verificaCorrispondenzaEmail(String emailPrenotazione, String emailAdesso){
-        if(emailPrenotazione.equals(emailAdesso)) return true;
-        return false;
+    private static boolean verificaCorrispondenzaEmail(String emailPrenotazione, String emailInput){
+        if(emailPrenotazione.equals(emailInput)) return true;
+        else return false;
 
     }
 
@@ -404,9 +397,8 @@ private static void mostraVoli(){
     }
 
     private AirManager() {
-
-        this.voli = new ArrayList<Volo>(); //private
-        //this.prenotazioni = new ArrayList<Prenotazione>(); //private
+        this.voucherEmessi = new HashMap<String, Voucher>();
+        this.voli = new ArrayList<Volo>();
         creaVoli();
         //creo voli di esempio e li aggiungo alla lista dei voli
 
@@ -435,12 +427,6 @@ private static void mostraVoli(){
 	    prenotazioni.add(p1);
 	    prenotazioni.add(p2);
 	    */
-        //creo prodotti di esempio e li aggiungo alla lista dei prodotti
-        /*pr1 = new Prodotto("0001", "Acqua Naturale", 2, 10);
-        pr2 = new Prodotto("0002", "Biscotti cioccolato", 3, 10); //provare con float
-        prodotti.add(pr1);
-        prodotti.add(pr2);*/
-
     }
 
 
@@ -470,25 +456,9 @@ private static void mostraVoli(){
 	}
 	*/
 
-	/*
-	public boolean verificaCorrispondenzaEmail(String prenotazioneTrovata, String email) {
-		//
-	}
-
-	public boolean verificaCorrispondenzaDocumento(String prenotazioneTrovata, String codiceDocumento) {
-
-	}
-
-	public boolean verificaCondizioniRimborso(Date dataPrenotazione) {
-
-	}
-
+    /*
 	public void definisciVoloCorrente(String numeroVolo) {
 		this.voloCorrente.numeroVolo = numeroVolo;
-	}
-
-	public boolean verificaUnicitaProdotto(String codProdotto1, String codProdotto2) {
-
 	}
 	*/
 

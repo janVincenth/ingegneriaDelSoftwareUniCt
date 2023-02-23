@@ -17,7 +17,7 @@ public class Cliente {
         this.documentoIdentità = documentoIdentità;
     }
 
-    CartaImbarco CartaImbarco; //puntatore
+    CartaImbarco cartaImbarco; //puntatore
 
     DocumentoIdentita documentoIdentità;
     Contatti contatti;
@@ -44,8 +44,9 @@ public class Cliente {
         this.Cognome=Cognome;
         this.codiceFiscale=codiceFiscale;
 
-        CartaImbarco CartaImbarco=new CartaImbarco();
-        this.CartaImbarco=CartaImbarco;
+        CartaImbarco cartaImbarco = new CartaImbarco();
+        cartaImbarco.setCliente(this);
+        this.cartaImbarco = cartaImbarco;
 
         creaDocumento();
         creaContatti();
@@ -79,7 +80,7 @@ public class Cliente {
         System.out.println("Il titolare di questa carta sei tu? -> y/n");
         String seiTitolareQuestion = scanner.nextLine();
         String nomeCognomeTitolare;
-        if (seiTitolareQuestion.equals("y")) nomeCognomeTitolare=Nome.concat(" "+Cognome);
+        if (seiTitolareQuestion.equalsIgnoreCase("y")) nomeCognomeTitolare=Nome.concat(" "+Cognome);
         else {System.out.println("Inserisci nome e cognome del titolare, per favore");
             nomeCognomeTitolare=scanner.nextLine();
         }
@@ -95,7 +96,7 @@ public class Cliente {
     }
 
     public CartaImbarco getCartaImbarco(){
-        return CartaImbarco;
+        return cartaImbarco;
 
     }
 }

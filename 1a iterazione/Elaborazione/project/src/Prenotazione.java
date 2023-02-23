@@ -5,7 +5,6 @@ public class Prenotazione {
     String numeroPrenotazione;
     LocalDate data;
     float importo;
-
     Cliente cliente; //puntatore
     DocumentoIdentita documentoIdentita; // puntatore
     RicorrenzaDiVolo ricorrenzaDiVolo; // puntatore
