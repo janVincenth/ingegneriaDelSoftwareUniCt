@@ -9,7 +9,7 @@ public class AirManager {
     private static AirManager airManager;
 
     //collezioni
-    private ArrayList<Volo> voli;
+    private static ArrayList<Volo> voli;
     private static ArrayList<RicorrenzaDiVolo> ricorrenze;
     //private ArrayList<Prenotazione> prenotazioni;
     private ArrayList<Prodotto> prodotti;
@@ -92,7 +92,10 @@ private static void mostraVoli(){
     }
 
     private static void init(){
-
+        aeroporti = new HashMap<>();
+        aeroporti.put("CTA","FONTANA ROSSA (Catania)");
+        aeroporti.put("FCO","FIUMICINO (Roma)");
+        aeroporti.put("FLR","PERETOLA (Firenze)");
     }
     private static void effettuaPrenotazione(Scanner scanner) throws InterruptedException {
         Prenotazione prenotazione = new Prenotazione();
@@ -102,20 +105,18 @@ private static void mostraVoli(){
         String aeroportoDestinazione;
         LocalDate dataPartenza;
 
-        aeroporti = new HashMap<>();
+
 
         //INIZIALIZZO LA COLLEZIONE CON AEROPORTI PRE-SELEZIONATI
-        aeroporti.put("CTA","FONTANA ROSSA (Catania)");
-        aeroporti.put("FCO","FIUMICINO (Roma)");
-        aeroporti.put("FLR","PERETOLA (Firenze)");
+
         //INIZIALIZZO LA COLLEZIONE CON RICORRENZE PRE-SCELTE
         ricorrenze = new ArrayList<RicorrenzaDiVolo>();
-        RicorrenzaDiVolo ricorrenza1v1= new RicorrenzaDiVolo(LocalDate.of(2023,06,14),"CTA","FCO",v1,80,50F),
-                ricorrenza2v1= new RicorrenzaDiVolo(LocalDate.of(2023,06,15),"CTA","FLR",v1,88,53F),
-                ricorrenza1v2= new RicorrenzaDiVolo(LocalDate.of(2023,06,14),"FLR","CTA",v2,90,70F),
-                ricorrenza2v2= new RicorrenzaDiVolo(LocalDate.of(2023,06,15),"FLR","FCO",v2,92,75F),
-                ricorrenza1v3= new RicorrenzaDiVolo(LocalDate.of(2023,06,14),"FCO","FLR",v3,20,40F),
-                ricorrenza2v3= new RicorrenzaDiVolo(LocalDate.of(2023,06,15),"FCO","CTA",v3,21,38F);
+        RicorrenzaDiVolo ricorrenza1v1= new RicorrenzaDiVolo(LocalDate.of(2023,06,14),"CTA","FCO",voli.get(0),80,50F),
+                ricorrenza2v1= new RicorrenzaDiVolo(LocalDate.of(2023,06,15),"CTA","FLR",voli.get(0),88,53F),
+                ricorrenza1v2= new RicorrenzaDiVolo(LocalDate.of(2023,06,14),"FLR","CTA",voli.get(1),90,70F),
+                ricorrenza2v2= new RicorrenzaDiVolo(LocalDate.of(2023,06,15),"FLR","FCO",voli.get(1),92,75F),
+                ricorrenza1v3= new RicorrenzaDiVolo(LocalDate.of(2023,06,14),"FCO","FLR",voli.get(2),20,40F),
+                ricorrenza2v3= new RicorrenzaDiVolo(LocalDate.of(2023,06,15),"FCO","CTA",voli.get(2),21,38F);
 
         MappaPostiASedere mappaAssociata1 = new MappaPostiASedere((short)90, false);
         MappaPostiASedere mappaAssociata2 = new MappaPostiASedere((short)90, false);
@@ -396,18 +397,25 @@ private static void mostraVoli(){
 
     }
 
+    public static void creaVoli(){
+        for(int i=0; i<(aeroporti.size()*aeroporti.size()-1)/2;i++){
+            voli.add(new Volo("AA012"+i)); // ai fini dimostrativi si generano voli aventi codifica uguale nei primi 5 caratteri, e il 6 varierà in funzione dell'indice i
+        }
+    }
+
     private AirManager() {
 
         this.voli = new ArrayList<Volo>(); //private
         //this.prenotazioni = new ArrayList<Prenotazione>(); //private
-
+        creaVoli();
         //creo voli di esempio e li aggiungo alla lista dei voli
-        v1 = new Volo("AZ4697");
+
+        /*v1 = new Volo("AZ4697");
         v2 = new Volo("FR1209");
         v3 = new Volo("AZ1406");
         voli.add(v1);
         voli.add(v2);
-        voli.add(v3);
+        voli.add(v3);*/
 
         //creo ricorrenze di esempio e li aggiungo a ciascun volo
         // vince: demo ricorrenze
