@@ -252,7 +252,7 @@ private static void mostraVoli(){
         }
     }
 
-    public List<Prenotazione> getPrenotazioni(){
+    public ArrayList<Prenotazione> getPrenotazioni(){
         return prenotazioni;
     }
 
@@ -260,9 +260,13 @@ private static void mostraVoli(){
         //verificare errore dello steccato
 
         if(Period.between(LocalDate.now(),dataVolo).getDays()>=3 && Period.between(LocalDate.now(),dataVolo).getDays()<30){
-            System.out.println("Hai diritto ad un rimborso del 25%, riceverai un voucher tramite email, grazie per la preferenza."); return 25;}
+            System.out.println("Hai diritto ad un rimborso del 25%, riceverai un voucher tramite email, grazie per la preferenza.");
+            return 25;
+        }
         else if(Period.between(LocalDate.now(),dataVolo).getDays()>=30){
-            System.out.println("Hai diritto ad un rimborso del 50%,riceverai un voucher tramite email, grazie per la preferenza."); return 50;}
+            System.out.println("Hai diritto ad un rimborso del 50%,riceverai un voucher tramite email, grazie per la preferenza.");
+            return 50;
+        }
         else{ System.out.println("Non hai diritto ad alcun rimborso, spiacenti."); return 0;}
     }
 
@@ -338,19 +342,19 @@ private static void mostraVoli(){
         }
 	}
 
-    private static void aggiornaCartaImbarcoCliente(CartaImbarco cartaImbarco, String nome, String cognome, String numeroCartaImbarco, short numeroPostoProposto) {
+    public static void aggiornaCartaImbarcoCliente(CartaImbarco cartaImbarco, String nome, String cognome, String numeroCartaImbarco, short numeroPostoProposto) {
         cartaImbarco.getCliente().setNome(nome);
         cartaImbarco.getCliente().setCognome(cognome);
         cartaImbarco.setNumeroCarta(numeroCartaImbarco);
         cartaImbarco.setPostoASedere(numeroPostoProposto);
     }
 
-    private static boolean verificaCorrispondenzaDocumento(String documentoPrenotazione, String documentoInput){
+    public static boolean verificaCorrispondenzaDocumento(String documentoPrenotazione, String documentoInput){
         if(documentoInput.equals(documentoPrenotazione)) return true;
         else return false;
     }
 
-    private static boolean verificaCorrispondenzaEmail(String emailPrenotazione, String emailInput){
+    public static boolean verificaCorrispondenzaEmail(String emailPrenotazione, String emailInput){
         if(emailPrenotazione.equals(emailInput)) return true;
         else return false;
 
@@ -429,6 +433,12 @@ private static void mostraVoli(){
 	    */
     }
 
+    public static AirManager getInstance() {
+        if (airManager == null)
+            airManager = new AirManager();
+
+        return airManager;
+    }
 
     private static Prenotazione getPrenotazione(String numeroPrenotazioneInput){
         for(int i = 0; i < prenotazioni.size(); i++){
@@ -437,12 +447,6 @@ private static void mostraVoli(){
                 return prenotazioni.get(i);
         }
         return null;
-    }
-    public static AirManager getInstance() {
-        if (airManager == null)
-            airManager = new AirManager();
-
-        return airManager;
     }
 
     public static void printMenu(String[] strings) {

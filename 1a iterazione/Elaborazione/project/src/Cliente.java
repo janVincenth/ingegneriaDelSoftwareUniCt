@@ -7,36 +7,10 @@ public class Cliente {
     String Cognome;
     String codiceFiscale;
 
-    Contatti Contatti; //puntatore
-
-    public DocumentoIdentita getDocumentoIdentità() {
-        return documentoIdentità;
-    }
-
-    public void setDocumentoIdentità(DocumentoIdentita documentoIdentità) {
-        this.documentoIdentità = documentoIdentità;
-    }
-
-    CartaImbarco cartaImbarco; //puntatore
-
-    DocumentoIdentita documentoIdentità;
     Contatti contatti;
+    CartaImbarco cartaImbarco; //puntatore
+    DocumentoIdentita documentoIdentità;
 
-    public String getNome() {
-        return Nome;
-    }
-
-    public void setNome(String nome) {
-        Nome = nome;
-    }
-
-    public String getCognome() {
-        return Cognome;
-    }
-
-    public void setCognome(String cognome) {
-        Cognome = cognome;
-    }
 
     public Cliente(String Nome, String Cognome, String codiceFiscale, Prenotazione prenotazione){
         scanner= new Scanner(System.in);
@@ -90,13 +64,53 @@ public class Cliente {
         if (circuitoQuestion==1) circuito="VISA"; else circuito="MASTERCARD";
         CartaPagamento cartaPagamento = new CartaPagamento(20,circuito,nomeCognomeTitolare,codiceCarta,scadenzaCarta,CVV);
     }
+
+    public String getNome() {
+        return Nome;
+    }
+
+    public void setNome(String nome) {
+        Nome = nome;
+    }
+
+    public String getCognome() {
+        return Cognome;
+    }
+
+    public void setCognome(String cognome) {
+        Cognome = cognome;
+    }
+
+    public String getCodiceFiscale() {
+        return codiceFiscale;
+    }
+
+    public void setCodiceFiscale(String codiceFiscale) {
+        this.codiceFiscale = codiceFiscale;
+    }
+
     public Contatti getContatti(){
         return this.contatti;
+    }
 
+    public void setContatti(Contatti contatti) {
+        this.contatti = contatti;
     }
 
     public CartaImbarco getCartaImbarco(){
         return cartaImbarco;
-
     }
+
+    public void setCartaImbarco(CartaImbarco cartaImbarco) {
+        this.cartaImbarco = cartaImbarco;
+    }
+
+    public DocumentoIdentita getDocumentoIdentità() {
+        return documentoIdentità;
+    }
+
+    public void setDocumentoIdentità(DocumentoIdentita documentoIdentità) {
+        this.documentoIdentità = documentoIdentità;
+    }
+
 }

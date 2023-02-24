@@ -15,4 +15,16 @@ public class DocumentoIdentita {
         return codiceDocumento;
 
     }
+
+    public void setCodiceDocumento(String codiceDocumento) {
+        this.codiceDocumento = codiceDocumento;
+    }
+
+    public LocalDate getScadenza() {
+        return scadenza;
+    }
+
+    public void setScadenza(LocalDate scadenza) {
+        this.scadenza = scadenza;
+    }
 }
