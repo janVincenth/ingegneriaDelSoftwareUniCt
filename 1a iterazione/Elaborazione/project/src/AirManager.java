@@ -13,10 +13,7 @@ public class AirManager {
     private static ArrayList<Prenotazione> prenotazioni;
     private static Map <String, Voucher> voucherEmessi;
     private static Map<String, String> aeroporti;
-    //istanze
-    //
-    private static Volo v1, v2, v3, voloCorrente;
-    //private Prenotazione p1, p2;
+
 
     public static void main(String[] args) throws InterruptedException {
         init();
@@ -70,13 +67,25 @@ public class AirManager {
             }
         }
     }
-private static void mostraVoli(){
-    System.out.println("\nEcco la lista degli aeroporti:"); //da implementare una lista di aeroporti da cui scegliere tramite elenco puntato
+public static int mostraVoli(Map<String, String> aeroporti){ //vince: passo il parametro locale cosicché da poter testare il metodo esternamente
+    System.out.println("\nEcco la lista degli aeroporti:");
+    int sentinella=0; //conta i voli visualizzati e si accerta che ad ogni codice IATA sia associato un aeroporto, e viceversa
     Iterator<Map.Entry<String, String>> iteratorAeroporti = aeroporti.entrySet().iterator();
-    while(iteratorAeroporti.hasNext()){
-        Map.Entry<String, String> demoAeroporto= iteratorAeroporti.next();
-        System.out.println("Codice IATA: " + demoAeroporto.getKey() + " - Denominazione: " + demoAeroporto.getValue() );
+    while(iteratorAeroporti.hasNext()) {
+        Map.Entry<String, String> demoAeroporto = iteratorAeroporti.next();
+        if (demoAeroporto.getKey() != null && demoAeroporto.getValue() != null) {
+            System.out.println("Codice IATA: " + demoAeroporto.getKey() + " - Denominazione: " + demoAeroporto.getValue());
+            sentinella++;
+        }else if (demoAeroporto.getKey() == null && demoAeroporto.getValue() == null){
+            sentinella= -1; //elemento della mappa vuoto, condizione non critica ma sgradita
+            break;
+        }
+        else {
+            sentinella=-2; //elemento della mappa non valido -> chiave null e valore diverso da null, o viceversa
+            break;
+        }
     }
+    return sentinella;
 }
     public static void pause(Scanner scanner){
 
@@ -136,7 +145,7 @@ private static void mostraVoli(){
         /**************************
          * vince deve assicurarsi che si match la chiave
          **************************/
-        mostraVoli();
+        mostraVoli(aeroporti);
 
         aeroportoPartenza= scanner.nextLine().toUpperCase();
         System.out.println("\nBene, partirai da: " +aeroporti.get(aeroportoPartenza) +". \nAdesso cortesemente digita il codice IATA dell'aeroporto di arrivo"); //come sopra
@@ -145,7 +154,7 @@ private static void mostraVoli(){
          * vince oltre ad assicurarmi che si match una chiave, nella selezione delle destinazioni non devo mostrare lo stesso aeroporto scelto come partenza
          **************************/
 
-        mostraVoli();
+        mostraVoli(aeroporti);
         aeroportoDestinazione= scanner.nextLine().toUpperCase();
         System.out.println("\nOttimo, il tuo viaggio inizierà da " +aeroporti.get(aeroportoPartenza) +"e finirà a "+aeroporti.get(aeroportoDestinazione)+ "\nIn che giorno vuoi partire? Per favore, inserisci la data di partenza nel formato gg-mm-aaaa"); //come sopra
 
@@ -394,8 +403,8 @@ private static void mostraVoli(){
 
     }
 
-    public static void creaVoli(){
-        for(int i=0; i<(aeroporti.size()*aeroporti.size()-1)/2;i++){
+    public static void creaVoli(){ //passo parametro locale per rendere testabile il metodo
+        for(int i=0; i<(aeroporti.size()*(aeroporti.size()-1)/2);i++){
             voli.add(new Volo("AA012"+i)); // ai fini dimostrativi si generano voli aventi codifica uguale nei primi 5 caratteri, e il 6 varierà in funzione dell'indice i
         }
     }

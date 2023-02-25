@@ -6,6 +6,8 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 class AirManagerTest {
     static AirManager airManager;
@@ -92,6 +94,22 @@ class AirManagerTest {
         assertNotEquals("0", cartaImbarco.getNumeroCarta());
     }
     */
+
+    @Test
+    void mostraVoliTest(){
+        Map<String, String> aeroporti;
+        aeroporti = new HashMap<>();
+        aeroporti.put("CTA","FONTANA ROSSA (Catania)");
+        aeroporti.put("FCO","FIUMICINO (Roma)");
+        aeroporti.put("FLR","PERETOLA (Firenze)");
+
+        assertEquals(3,AirManager.mostraVoli(aeroporti)); //per ogni aeroporto inserito devo avere una riga nella lista visualizzata a video
+        aeroporti.put("ABC",null);
+        assertEquals(-2,AirManager.mostraVoli(aeroporti)); //ad ogni codice IATa deve corrispondere una denominazione aeroporto
+        aeroporti.put(null,null);
+        assertEquals(-1,AirManager.mostraVoli(aeroporti)); //ad ogni codice IATa deve corrispondere una denominazione aeroporto
+
+    }
 }
 
 
