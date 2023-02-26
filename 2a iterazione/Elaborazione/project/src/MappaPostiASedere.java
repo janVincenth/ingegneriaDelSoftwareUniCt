@@ -2,14 +2,16 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class MappaPostiASedere {
-	private HashMap<Short, Boolean> postiOccupati = new HashMap<Short, Boolean>();
+	private HashMap<Short, Boolean> postiOccupati;
 	private short numeroPostiDisponibili;
 	
 	public MappaPostiASedere(short numeroPostiDisponibili, boolean libero) {
+		postiOccupati= new HashMap<Short, Boolean>();
 		this.numeroPostiDisponibili = numeroPostiDisponibili;
 		for(int i=0; i < this.numeroPostiDisponibili; i++) {
 			postiOccupati.put((short)i, libero); //tutti i posti a sedere sono inizialmente liberi
 		}
+
 	}
 
 	public short definisciPosto() {

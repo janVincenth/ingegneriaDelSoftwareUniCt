@@ -45,7 +45,7 @@ public class Cliente {
     }
 
     private void creaCarta(Prenotazione p){
-        System.out.println("Vuoi utilizzare un voucher in tuo possesso per ottenere uno sconto sul prezzo del biglietto?\n1. Sì\n2.");
+        /*System.out.println("Vuoi utilizzare un voucher in tuo possesso per ottenere uno sconto sul prezzo del biglietto?\n1. Sì\n2.");
         int option = scanner.nextInt();
         if (option == 1) { // il cliente vuole utilizzare un voucher in suo possesso
             System.out.println("Inserisci un codice voucher valido: ");
@@ -81,8 +81,8 @@ public class Cliente {
             else {
                 System.out.println("Il codice voucher inserito non corrisponde a nessun voucher emesso dalla compagnia. Si prega di riprovare inserendo un codice voucher valido.");
             }
-        }
-        else {
+        }*/
+        /*else*/ {
             System.out.println("Grazie "+Nome+", adesso possiamo procedere con il pagamento :)\nAl momento puoi effettuare il pagamento esclusivamente tramite carta, quindi, puoi cortesemente digitare il codice di 16 cifre impresso sulla tua carta di pagamento?");
             String codiceCarta= scanner.nextLine(); //correggere tipo su DCD
             System.out.println("Quando scade la carta?");
@@ -101,7 +101,7 @@ public class Cliente {
             String circuito;
             if (circuitoQuestion==1) circuito="VISA"; else circuito="MASTERCARD";
             CartaPagamento cartaPagamento = new CartaPagamento(20,circuito,nomeCognomeTitolare,codiceCarta,scadenzaCarta,CVV);
-        }
+        }}
 
     public String getNome() {
         return Nome;

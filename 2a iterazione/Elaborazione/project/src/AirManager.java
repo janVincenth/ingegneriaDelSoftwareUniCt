@@ -94,14 +94,22 @@ public static int mostraVoli(Map<String, String> aeroporti){ //vince: passo il p
     }
 
     private static void init(){
+        voucherEmessi = new HashMap<String, Voucher>();
+        voli = new ArrayList<Volo>();
+
+
+        creaVoucherPosto();
         aeroporti = new HashMap<>();
         aeroporti.put("CTA","FONTANA ROSSA (Catania)");
         aeroporti.put("FCO","FIUMICINO (Roma)");
         aeroporti.put("FLR","PERETOLA (Firenze)");
+
+        creaVoli();
+
     }
     private static void effettuaPrenotazione(Scanner scanner) throws InterruptedException {
         Prenotazione prenotazione = new Prenotazione(); // analogamente al corrispondente SD
-        //prenotazioni = new ArrayList<Prenotazione>();
+        prenotazioni = new ArrayList<Prenotazione>();
 
         String aeroportoPartenza;
         String aeroportoDestinazione;
@@ -234,6 +242,7 @@ public static int mostraVoli(Map<String, String> aeroporti){ //vince: passo il p
             simulAttesa();
             if (verificaCorrispondenzaDocumento(codiceSuPrenotazione, codiceComunicatoAdesso))
                 System.out.println("Il codice che hai inserito è stato verificato");
+            else System.exit(0); //implementare correzione su errore
             int rimborsoPercentuale = verificaCondizioniRimborso(prenotazioneTrovata.getRicorrenza().getDataPartenza());
             cancellazioneEffettivaPrenotazione(prenotazioneTrovata, prenotazioni);
             float importoRimborsato = calcolaImportoRimborsato(prenotazioneTrovata.getImporto(), rimborsoPercentuale);
@@ -327,21 +336,13 @@ public static int mostraVoli(Map<String, String> aeroporti){ //vince: passo il p
                             short numeroPostoProposto = mappaPrenotazione.definisciPosto();
 
                             System.out.println("\nAir-Manager ti propone il seguente posto a sedere: " + (short) (numeroPostoProposto + 1) + "\nAccetti?\n1. Sì\n2. No");
-                            int option = scanner.nextInt();
-                            if (option == 1) { // scenario principale
+                            int options = scanner.nextInt();
+                            if (options == 1) { // scenario principale
                                 mappaPrenotazione.setPostiOccupati(numeroPostoProposto);
-                                System.out.println("\nBene, viaggerai al posto numero " + (short) (numeroPostoProposto + 1) + "\n");
-
-                                String numeroCartaImbarco = String.valueOf((int) (Math.random() * 10000000)); // generatore casuale di numeroCartaImbarco
-                                String nome = cl.getNome();
-                                String cognome = cl.getCognome();
-                                CartaImbarco cartaImbarco = cl.getCartaImbarco();
-
-                                aggiornaCartaImbarcoCliente(cartaImbarco, nome, cognome, numeroCartaImbarco, numeroPostoProposto);
-                                System.out.println(cartaImbarco); //mostro a schermo i dettagli della carta d'imbarco emessa
-                                pause(scanner);
-                            } else if (option == 2) {
-                                System.out.println("Posto rifiutato (scenario alternativo non ancora implementato nella corrente iterazione (iterazione 1)");
+                                finalizzaCartaImbarco(scanner, numeroPostoProposto, cl);
+                            } else if (options == 2) {
+                                 //voucher fantasma
+                                gestisciSceltaArbitrariaPosto(numeroPostoProposto, scanner, mappaPrenotazione, cl);
                             } else System.out.println("Opzione non valida");
                         }
                         // non è più presente almeno un posto a sedere libero (overbooking)
@@ -352,6 +353,64 @@ public static int mostraVoli(Map<String, String> aeroporti){ //vince: passo il p
             }
         }
 	}
+
+    public static void finalizzaCartaImbarco(Scanner scanner, short numeroPostoProposto, Cliente cl){
+        System.out.println("\nBene, viaggerai al posto numero " + (short) (numeroPostoProposto + 1) + "\n");
+
+        String numeroCartaImbarco = String.valueOf((int) (Math.random() * 10000000)); // generatore casuale di numeroCartaImbarco
+        String nome = cl.getNome();
+        String cognome = cl.getCognome();
+        CartaImbarco cartaImbarco = cl.getCartaImbarco();
+
+        aggiornaCartaImbarcoCliente(cartaImbarco, nome, cognome, numeroCartaImbarco, numeroPostoProposto);
+        System.out.println(cartaImbarco); //mostro a schermo i dettagli della carta d'imbarco emessa
+        pause(scanner);
+    }
+
+    public static void creaVoucherPosto(){     //metodo fantasma per la creazione di un voucher valido che consenta di andare in runtime su checkin, scegli posto.
+        Voucher voucherSceltaPosto = new Voucher(0F,"voucherScegliPosto");
+        voucherSceltaPosto.setVoucherID("1001");
+        voucherSceltaPosto.setDataScadenzaVoucher(LocalDate.of(2023,10,10));
+        voucherEmessi.put("1001", voucherSceltaPosto);
+
+    }
+
+    public static boolean gestisciSceltaArbitrariaPosto(short numeroPostoProposto, Scanner scanner, MappaPostiASedere mappaPrenotazione, Cliente cl){
+        System.out.println("Alla tua prenotazione non è associato alcun extra che dia diritto alla scelta del posto a sedere.\nSe hai un voucher inserisci il codice Voucher, altrimenti premi INVIO per accettare il posto numero "+ (numeroPostoProposto + 1));
+        int postoSceltoArbitrariamente;
+
+        String codiceVoucherDigitato = scanner.next();
+        System.out.println(codiceVoucherDigitato);
+        Voucher voucherTrovatoInArchivio = voucherEmessi.get(codiceVoucherDigitato);
+        boolean alertPostoGiaOccupato = false; //mi servirà per avvisare l'utente che il posto scelto è già occupato
+        if(Voucher.controlloVoucher(voucherTrovatoInArchivio)!=2){
+            System.out.println("Voucher non valido. Ripetere l'operazione ");
+            AirManager.pause(scanner);
+        }
+        else {
+            if (mappaPrenotazione.getNumeroPostiDisponibili()<2)
+                System.out.println("Spiacenti, l'unico posto disponibile è quello proposto, ovvero il "+(numeroPostoProposto + 1));
+            else{
+                System.out.println("Il codice voucher che hai inserito ti dà diritto a scegliere un posto.\nDigita il numero del posto che vorresti prendere (numero posti: 90)");
+                do {
+
+                    postoSceltoArbitrariamente = scanner.nextInt();
+
+                    postoSceltoArbitrariamente--; //correggo lo sfasamento d'indice
+                    //raffinare il controllo 1-90 -> inizialmente si accorge che vado fuori range, ma se poi correggo non prende il valore
+                    if (postoSceltoArbitrariamente<0 || postoSceltoArbitrariamente>90 || mappaPrenotazione.getPostiOccupati().get((short)postoSceltoArbitrariamente).equals(true)) {
+                        System.out.println("Spiacenti, il posto scelto non è disponibile.\nScegli un altro posto");
+                        alertPostoGiaOccupato=true;
+
+                    }
+                }while(alertPostoGiaOccupato);
+                mappaPrenotazione.setPostiOccupati((short)postoSceltoArbitrariamente);
+                finalizzaCartaImbarco(scanner, (short) postoSceltoArbitrariamente,cl);
+            }
+        }
+        return true;
+
+    }
 
     public static void aggiornaCartaImbarcoCliente(CartaImbarco cartaImbarco, String nome, String cognome, String numeroCartaImbarco, short numeroPostoProposto) {
         cartaImbarco.getCliente().setNome(nome);
@@ -413,36 +472,8 @@ public static int mostraVoli(Map<String, String> aeroporti){ //vince: passo il p
 
     private AirManager() {
         
-        this.voucherEmessi = new HashMap<String, Voucher>();
-        this.voli = new ArrayList<Volo>();
-        creaVoli();
-        //creo voli di esempio e li aggiungo alla lista dei voli
-
-        /*v1 = new Volo("AZ4697");
-        v2 = new Volo("FR1209");
-        v3 = new Volo("AZ1406");
-        voli.add(v1);
-        voli.add(v2);
-        voli.add(v3);*/
-
-        //creo ricorrenze di esempio e li aggiungo a ciascun volo
-        // vince: demo ricorrenze
 
 
-
-        //creo prenotazioni di esempio e le aggiungo alla lista delle prenotazioni
-	    /*
-	    p1 = new Prenotazione();
-	    p1.numeroPrenotazione.setNumeroPrenotazione("ABCDEF012345");
-	    p1.data.setData(LocalDate.of(2023, 1, 10));
-	    p1.importo.setImporto(50);
-	    p2 = new Prenotazione();
-	    p2.numeroPrenotazione.setNumeroPrenotazione("GHILMN012345");
-	    p2.data.setData(LocalDate.of(2020, 9, 9));
-	    p2.importo.setImporto(50);
-	    prenotazioni.add(p1);
-	    prenotazioni.add(p2);
-	    */
     }
 
     public static AirManager getInstance() {
