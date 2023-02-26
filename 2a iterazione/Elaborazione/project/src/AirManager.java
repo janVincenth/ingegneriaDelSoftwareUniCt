@@ -6,6 +6,7 @@ import java.time.LocalDate;
 public class AirManager {
     //aggiungere metodi getters & setters
     private static AirManager airManager;
+    public static ServizioPagamento servizioPagamento;
 
     //collezioni
     private static ArrayList<Volo> voli;
@@ -18,6 +19,7 @@ public class AirManager {
     public static void main(String[] args) throws InterruptedException {
         init();
         AirManager airManager = getInstance();
+        servizioPagamento = new ServizioPagamento();
         Scanner scanner = new Scanner(System.in);
 
         System.out.println("Benvenuto in Air-Manager!\nStai utilizzando il software come impiegato o come cliente?");
@@ -165,7 +167,7 @@ public static int mostraVoli(Map<String, String> aeroporti){ //vince: passo il p
 
         mostraVoli(aeroporti);
         aeroportoDestinazione= scanner.nextLine().toUpperCase();
-        System.out.println("\nOttimo, il tuo viaggio inizierà da " +aeroporti.get(aeroportoPartenza) +"e finirà a "+aeroporti.get(aeroportoDestinazione)+ "\nIn che giorno vuoi partire? Per favore, inserisci la data di partenza nel formato gg-mm-aaaa"); //come sopra
+        System.out.println("\nOttimo, il tuo viaggio inizierà da " +aeroporti.get(aeroportoPartenza) +"e finirà a "+aeroporti.get(aeroportoDestinazione)+ "\nIn che giorno vuoi partire? Per favore, inserisci la data di partenza nel formato aaaa-mm-gg"); //come sopra
 
         /**************************
          * vince implementare un controllo data inserita
@@ -208,6 +210,7 @@ public static int mostraVoli(Map<String, String> aeroporti){ //vince: passo il p
 
         prenotazioni.add(prenotazione);
         simulAttesa();
+
         System.out.println("Il pagamento è andato a buon fine. La prenotazione è stata registrata"); //vince: aggiornare DCD
         pause(scanner);
 
@@ -341,7 +344,7 @@ public static int mostraVoli(Map<String, String> aeroporti){ //vince: passo il p
                                 mappaPrenotazione.setPostiOccupati(numeroPostoProposto);
                                 finalizzaCartaImbarco(scanner, numeroPostoProposto, cl);
                             } else if (options == 2) {
-                                 //voucher fantasma
+                                //voucher fantasma
                                 gestisciSceltaArbitrariaPosto(numeroPostoProposto, scanner, mappaPrenotazione, cl);
                             } else System.out.println("Opzione non valida");
                         }
@@ -471,8 +474,6 @@ public static int mostraVoli(Map<String, String> aeroporti){ //vince: passo il p
     }
 
     private AirManager() {
-        
-
 
     }
 

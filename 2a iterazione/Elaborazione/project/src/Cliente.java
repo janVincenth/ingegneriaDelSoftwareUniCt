@@ -45,44 +45,43 @@ public class Cliente {
     }
 
     private void creaCarta(Prenotazione p){
-        /*System.out.println("Vuoi utilizzare un voucher in tuo possesso per ottenere uno sconto sul prezzo del biglietto?\n1. Sì\n2.");
+        /*
+        float importoScontato = 0;
+        boolean voucherValido = false;
+
+        System.out.println("Vuoi utilizzare un voucher in tuo possesso per ottenere uno sconto sul prezzo del biglietto?\n1. Sì\n2.");
         int option = scanner.nextInt();
+
         if (option == 1) { // il cliente vuole utilizzare un voucher in suo possesso
+
+
             System.out.println("Inserisci un codice voucher valido: ");
-            String codiceVoucherInput = scanner.nextLine();
-            boolean voucherValido = true;
-            //verifico validità del voucher (successivamente definire apposita funzione)
-            Voucher voucher = AirManager.voucherEmessi.get(codiceVoucherInput);
-            if(voucher != null){ // il voucher è stato emesso dalla compagnia
-                if(!voucher.utilizzato){ // il voucher proposto non è ancora stato utilizzato
-                    if(voucher.getTipologia() == "scontoAcquistoBiglietto"){ // il voucher proposto è valido per l'acquisto di un biglietto
-                        if(voucher.getDataScadenzaVoucher().isAfter(LocalDate.now())){
-                            float importoScontato = p.getImporto() - voucher.getImporto();
-                            if(importoScontato > 0){
 
-                            }
-                            else { // importoScontato < 0, prenotazione effettuata
-                                System.out.println("In seguito all'applicazione del voucher da te proposto, l'importo da pagare è stato azzerato. La prenotazione è andata a buon fine. Ti aspettiamo a bordo!");
-                                voucher.setUtilizzato(true);
-                            }
-                        }
-                        else {
+            String codiceVoucherInput = scanner.nextLine(); // occorre inserire 1001
+            // System.out.println(codiceVoucherDigitato); // stampa di debug
+            Voucher voucherTrovatoInArchivio = AirManager.voucherEmessi.get(codiceVoucherInput);
 
-                        }
-                    }
-                    else{
-                        System.out.println("Il voucher proposto non è utilizzabile in fase di acquisto di un biglietto. Si prega di riprovare inserendo un codice voucher valido.");
-                    }
-                }
-                else{
-                    System.out.println("Il voucher proposto è già stato utilizzato. Si prega di riprovare inserendo un codice voucher valido.");
-                }
+            if(Voucher.controlloVoucher(voucherTrovatoInArchivio) != 1){ // 1 -> voucher valido per questo acquisto
+                System.out.println("Voucher non valido. Ripetere l'operazione...");
+                voucherValido = false;
+                AirManager.pause(scanner);
             }
-            else {
-                System.out.println("Il codice voucher inserito non corrisponde a nessun voucher emesso dalla compagnia. Si prega di riprovare inserendo un codice voucher valido.");
+            else { // se il voucher utilizzato è valido per questo acquisto, calcolo il nuovo importo, comprensivo dello sconto
+                importoScontato = p.getImporto() - voucherTrovatoInArchivio.getImporto();
+                voucherValido = true;
             }
-        }*/
-        /*else*/ {
+
+            if (importoScontato <= 0) {
+                System.out.println("In seguito all'applicazione del voucher da te proposto, l'importo da pagare è stato azzerato. La prenotazione è andata a buon fine. Ti aspettiamo a bordo!");
+                voucherTrovatoInArchivio.setUtilizzato(true);
+            } else { // importoScontato < 0, prenotazione effettuata
+
+            }
+
+        }
+        else if (option == 2){ // option 2: cliente non vuole usare voucher
+        */
+
             System.out.println("Grazie "+Nome+", adesso possiamo procedere con il pagamento :)\nAl momento puoi effettuare il pagamento esclusivamente tramite carta, quindi, puoi cortesemente digitare il codice di 16 cifre impresso sulla tua carta di pagamento?");
             String codiceCarta= scanner.nextLine(); //correggere tipo su DCD
             System.out.println("Quando scade la carta?");
@@ -101,7 +100,12 @@ public class Cliente {
             String circuito;
             if (circuitoQuestion==1) circuito="VISA"; else circuito="MASTERCARD";
             CartaPagamento cartaPagamento = new CartaPagamento(20,circuito,nomeCognomeTitolare,codiceCarta,scadenzaCarta,CVV);
-        }}
+            Transazione transazioneGenerata = cartaPagamento.getTransazione();
+            System.out.println("Stiamo contattando il servizio di pagamento...");
+            //AirManager.simulAttesa();
+            AirManager.servizioPagamento.richiediApprovazione(transazioneGenerata);
+
+    }
 
     public String getNome() {
         return Nome;
