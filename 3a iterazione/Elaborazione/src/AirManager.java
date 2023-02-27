@@ -1,4 +1,6 @@
+import java.time.DateTimeException;
 import java.time.Period;
+import java.time.format.DateTimeParseException;
 import java.util.*;
 import java.time.LocalDate;
 
@@ -20,13 +22,21 @@ public class AirManager {
         AirManager airManager = getInstance();
         gestionePagamento = new GestionePagamento();
         Scanner scanner = new Scanner(System.in);
-
-        System.out.println("Benvenuto in Air-Manager!\nStai utilizzando il software come impiegato o come cliente?");
-
+        routineCliente(scanner);
+        /*int user=0;
+        String buffer;
         String[] userOptions = {"1. Cliente", "2. Impiegato"};
-        printMenu(userOptions);
+        do {
+            System.out.println("Benvenuto in Air-Manager!\nStai utilizzando il software come impiegato o come cliente?");
 
-        int user = Integer.parseInt(scanner.nextLine());
+
+            printMenu(userOptions);
+            buffer=scanner.nextLine();
+            if (isNumeric(buffer)) user = Integer.parseInt(buffer);
+
+        }while(user<1 || user>2);
+
+
 
         if(user==1) { //utilizzo da parte di un cliente
             routineCliente(scanner);
@@ -34,9 +44,29 @@ public class AirManager {
         else if(user==2) { //utilizzo da parte di un impiegato
             routineImpiegato(scanner);
         }
-        else System.out.println("Il valore inserito non è valido. Ritenta.");
+        else System.out.println("Il valore inserito non è valido. Ritenta.");*/
 
     } //fine main
+
+    public static boolean isNumeric(String string) {
+        int intValue;
+
+
+
+        if(string == null || string.equals("")) {
+
+            return false;
+        }
+
+        try {
+            intValue = Integer.parseInt(string);
+            return true;
+        } catch (NumberFormatException e) {
+            System.out.println("Devi inserire un valore numerico");
+            pause(new Scanner(System.in));
+        }
+        return false;
+    }
 
     private static void routineCliente(Scanner scanner) throws InterruptedException {
         String[] clientOptions = {"1. Effettuare una prenotazione (Acquisto biglietto)",
@@ -45,11 +75,17 @@ public class AirManager {
                 "4. Esci da Air-Manager"
         };
         int option = 0;
+        String buffer;
         while(option != 4) {
-            System.out.println("\nSpecifica il numero dell'operazione che desideri effettuare fra le seguenti: ");
-            printMenu(clientOptions);
+            do {
+                System.out.println("\nSpecifica il numero dell'operazione che desideri effettuare fra le seguenti: ");
+                printMenu(clientOptions);
+                buffer=scanner.nextLine();
+                if(isNumeric(buffer))
+                option = Integer.parseInt(buffer); //alternativamente, posso usare System.nextInt()
 
-            option = Integer.parseInt(scanner.nextLine()); //alternativamente, posso usare System.nextInt()
+            }while(option<1 || option>4);
+
 
             switch(option) {
                 case 1:
@@ -68,14 +104,16 @@ public class AirManager {
             }
         }
     }
-public static int mostraVoli(Map<String, String> aeroporti){ //vince: passo il parametro locale cosicché da poter testare il metodo esternamente
+public static int mostraVoli(Map<String, String> aeroporti, String aeroportoNoShow){ //vince: passo il parametro locale cosicché da poter testare il metodo esternamente
     System.out.println("\nEcco la lista degli aeroporti:");
     int sentinella=0; //conta i voli visualizzati e si accerta che ad ogni codice IATA sia associato un aeroporto, e viceversa
+    boolean supportoNoShow=true;
     Iterator<Map.Entry<String, String>> iteratorAeroporti = aeroporti.entrySet().iterator();
     while(iteratorAeroporti.hasNext()) {
         Map.Entry<String, String> demoAeroporto = iteratorAeroporti.next();
+        if (demoAeroporto.getKey().toUpperCase().equals(aeroportoNoShow)) supportoNoShow=false; else supportoNoShow=true;
         if (demoAeroporto.getKey() != null && demoAeroporto.getValue() != null) {
-            System.out.println("Codice IATA: " + demoAeroporto.getKey() + " - Denominazione: " + demoAeroporto.getValue());
+            System.out.println("Codice IATA: " + demoAeroporto.getKey() + " - Denominazione: " + demoAeroporto.getValue()+aeroportoNoShow);
             sentinella++;
         }else if (demoAeroporto.getKey() == null && demoAeroporto.getValue() == null){
             sentinella= -1; //elemento della mappa vuoto, condizione non critica ma sgradita
@@ -108,6 +146,18 @@ public static int mostraVoli(Map<String, String> aeroporti){ //vince: passo il p
         creaVoli();
 
     }
+
+    public static LocalDate inserisciData(Scanner scanner){
+        try {
+            return LocalDate.parse(scanner.nextLine());
+        } catch (DateTimeParseException e) {
+            System.out.println("inserire una data valida");
+            return inserisciData(scanner);
+
+        }
+    }
+
+
     private static void effettuaPrenotazione(Scanner scanner) throws InterruptedException {
         Prenotazione prenotazione = new Prenotazione(); // analogamente al corrispondente SD
         prenotazioni = new ArrayList<Prenotazione>();
@@ -115,7 +165,7 @@ public static int mostraVoli(Map<String, String> aeroporti){ //vince: passo il p
         String aeroportoPartenza;
         String aeroportoDestinazione;
         LocalDate currentDate = LocalDate.now();
-        LocalDate dataPartenza;
+        LocalDate dataPartenza=null;
 
         //INIZIALIZZO LA COLLEZIONE CON AEROPORTI PRE-SELEZIONATI
 
@@ -153,29 +203,31 @@ public static int mostraVoli(Map<String, String> aeroporti){ //vince: passo il p
         System.out.println("\nPer favore, scegli un aeroporto di partenza digitando il codice IATA corrispondente:"); //da implementare una lista di aeroporti da cui scegliere tramite elenco puntato
 
         /**************************
-         * vince deve assicurarsi che si match la chiave
+         * vince deve assicurarsi che si match la chiave- fatto
          **************************/
-        mostraVoli(aeroporti);
+        mostraVoli(aeroporti, null); //il noShow mi serve dopo per evitare che il cliente selezioni aeroportoPartenza==aeropostoDestinazione
 
         aeroportoPartenza= scanner.nextLine().toUpperCase();
+        while(aeroporti.get(aeroportoPartenza)==null){ System.out.println("\nIl codice IATA digitato non esiste, o per l'aeroporto corrispondente al momento non sono previsti voli.\nInserisci un codice tra quelli proposti"); mostraVoli(aeroporti, null); aeroportoPartenza= scanner.nextLine().toUpperCase(); }
+
         System.out.println("\nBene, partirai da: " +aeroporti.get(aeroportoPartenza) +". \nAdesso cortesemente digita il codice IATA dell'aeroporto di arrivo"); //come sopra
-
-        /**************************
-         * vince oltre ad assicurarmi che si match una chiave, nella selezione delle destinazioni non devo mostrare lo stesso aeroporto scelto come partenza
-         **************************/
-
-        mostraVoli(aeroporti);
+        mostraVoli(aeroporti, aeroportoPartenza);
         aeroportoDestinazione= scanner.nextLine().toUpperCase();
+
+        while(aeroporti.get(aeroportoDestinazione)==null){ System.out.println("\nIl codice IATA digitato non esiste, o per l'aeroporto corrispondente al momento non sono previsti voli.\nInserisci un codice tra quelli proposti"); mostraVoli(aeroporti, aeroportoPartenza); aeroportoDestinazione= scanner.nextLine().toUpperCase(); }
+
         System.out.println("\nOttimo, il tuo viaggio inizierà da " +aeroporti.get(aeroportoPartenza) +"e finirà a "+aeroporti.get(aeroportoDestinazione)+ "\nIn che giorno vuoi partire? Per favore, inserisci la data di partenza nel formato aaaa-mm-gg"); //come sopra
 
         /**************************
          * vince implementare un controllo data inserita
          **************************/
 
-		dataPartenza =  LocalDate.parse(scanner.nextLine());
+
+        dataPartenza = inserisciData(scanner);
 
         if(dataPartenza.isBefore(currentDate)){
             System.out.println("La data di partenza inserita non è valida. Si prega di riprovare inserendo una data valida.");
+            dataPartenza=inserisciData(scanner);
         }; //gestire else
 
 
@@ -186,31 +238,43 @@ public static int mostraVoli(Map<String, String> aeroporti){ //vince: passo il p
 
         }
         //vince: ho appena mostrato la lista dei voli che matchano le preferenze, adesso devo fare selezionare il volo di preferenza.
-        // l'indice delle opzioni di volo non parte da 1
-        System.out.println("Effettua una scelta ");
-        int ricorrenzaScelta = Integer.parseInt(scanner.nextLine())-1;
+        // devo accertarmi adesso che il cliente possa selezionare solo una scelta visualizzata
+
+        boolean checkSuSelezioneRicorrenza=true;
+        int ricorrenzaScelta;
+        do {
+            System.out.println("Effettua una scelta valida");
+            ricorrenzaScelta = Integer.parseInt(scanner.nextLine()) - 1;
+
+            if (ricorrenze.get(ricorrenzaScelta).getAeroportoPartenza().equals(aeroportoPartenza) && ricorrenze.get(ricorrenzaScelta).getAeroportoArrivo().equals(aeroportoDestinazione)) checkSuSelezioneRicorrenza=false;
+        }while(checkSuSelezioneRicorrenza);
 
         System.out.println("Fantastico! Andiamo avanti, adesso ho bisogno di sapere come ti chiami?");
         String nome = scanner.nextLine();
         System.out.println("Quale è il tuo cognome?");
         String cognome = scanner.nextLine();
-        System.out.println("Adesso ho bisogno del tuo codice fiscale per favore, puoi digitarlo sotto");
-        String codiceFiscale = scanner.nextLine();
+        String codiceFiscale;
+        do{
+            System.out.println("Adesso ho bisogno del tuo codice fiscale per favore, puoi digitarlo sotto (16 caratteri)");
+            codiceFiscale = scanner.nextLine();
+        }while(codiceFiscale.length()!=16);
+
 
         Cliente cliente = new Cliente(nome, cognome, codiceFiscale, prenotazione); //vince: passo prenotazione perchè è cliente che deve settare su di essa il documento, dopo averlo creato
 
         prenotazione.setData(LocalDate.now());
         prenotazione.setImporto(ricorrenze.get(ricorrenzaScelta).getPrezzo()); //20 cast in float F
         prenotazione.setCliente(cliente);
-        prenotazione.setNumeroPrenotazione("1000");
+        String generaNumPren=String.valueOf((int) (Math.random() * 1000));
+        prenotazione.setNumeroPrenotazione(generaNumPren);
+        System.out.println("La tua prenotazione è la numero "+generaNumPren+". Conserva con cura questo riferimento");
         DocumentoIdentita documentoDaAssociareAPrenotazione=cliente.getDocumentoIdentità();
         prenotazione.setDocumentoIdentita(documentoDaAssociareAPrenotazione);
         prenotazione.setRicorrenzaDiVolo(ricorrenze.get(ricorrenzaScelta)); //scelta corrisponde alla ricorrenza selezionata
 
         prenotazioni.add(prenotazione);
-        simulAttesa();
 
-        System.out.println("Il pagamento è andato a buon fine. La prenotazione è stata registrata"); //vince: aggiornare DCD
+
         pause(scanner);
 
     }
@@ -442,11 +506,13 @@ public static int mostraVoli(Map<String, String> aeroporti){ //vince: passo il p
                 "3. Stampare lista dei prodotti in sottoscorta",
                 "4. Esci da Air-Manager"
         };
+        int option;
+        do {
+            System.out.println("\nSpecifica il numero dell'operazione che desideri effettuare fra le seguenti: ");
+            printMenu(employedOptions);
 
-        System.out.println("\nSpecifica il numero dell'operazione che desideri effettuare fra le seguenti: ");
-        printMenu(employedOptions);
-
-        int option = Integer.parseInt(scanner.nextLine());
+            option = Integer.parseInt(scanner.nextLine());
+        }while(option<1 || option>4);
 
         switch(option) {
             case 1:

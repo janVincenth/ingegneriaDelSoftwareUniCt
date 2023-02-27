@@ -33,17 +33,36 @@ public class Cliente {
     }
 
     private void creaContatti() {
-        System.out.println("Quale è il tuo indirizzo e-mail?");
-        String email = scanner.nextLine();
+        String email;
+        boolean ripetiInserimento=true;
+        do{
+            System.out.println("Quale è il tuo indirizzo e-mail?");
+            email = scanner.nextLine();
+            if (email.contains("@") && (email.contains(".net") || email.contains(".it") || email.contains(".com"))) ripetiInserimento=false;
+        }while(ripetiInserimento);
+
+
+
+
         contatti=new Contatti(email);
 
     }
 
     private void creaDocumento() {
-        System.out.println("Adesso puoi digitare il codice del tuo documento per favore?");
-        String codiceDocumento = scanner.nextLine();
-        System.out.println("Quando scade il tuo documento?"); //vince: al momento non formatto la data, ma poi dovrò formattarla - importante controllare anche se non è scaduto
-        LocalDate scadenzaDocumento = LocalDate.parse(scanner.nextLine());
+        String codiceDocumento;
+
+        do{
+            System.out.println("Adesso puoi digitare il codice del tuo documento per favore? (9 caratteri)");
+            codiceDocumento = scanner.nextLine();
+        }while(codiceDocumento.length()!=9);
+
+        LocalDate scadenzaDocumento;
+        do {
+            System.out.println("Quando scade il tuo documento? (devi inserisce un documento non ancora scaduto)"); //vince: al momento non formatto la data, ma poi dovrò formattarla - importante controllare anche se non è scaduto
+            scadenzaDocumento = AirManager.inserisciData(scanner);
+        }while(scadenzaDocumento.isBefore(LocalDate.now()));
+
+
         documentoIdentità=new DocumentoIdentita(codiceDocumento,scadenzaDocumento);
 
     }
@@ -85,30 +104,64 @@ public class Cliente {
         }
         else if (option == 2){ // option 2: cliente non vuole usare voucher
         */
+            String codiceCarta;
+            boolean nonSoloNumeri=true;
+            do {
+                System.out.println("Grazie " + Nome + ", adesso possiamo procedere con il pagamento :)\nAl momento puoi effettuare il pagamento esclusivamente tramite carta, quindi, puoi cortesemente digitare il codice di 16 cifre impresso sulla tua carta di pagamento?");
+                codiceCarta = scanner.nextLine(); //correggere tipo su DCD
+                if(AirManager.isNumeric(codiceCarta.substring(0,9))) nonSoloNumeri=false; else nonSoloNumeri=true;
+                if(AirManager.isNumeric(codiceCarta.substring(9,16))) nonSoloNumeri=false; else nonSoloNumeri=true;
+            }while(codiceCarta.length()!=16 || nonSoloNumeri);
 
-            System.out.println("Grazie "+Nome+", adesso possiamo procedere con il pagamento :)\nAl momento puoi effettuare il pagamento esclusivamente tramite carta, quindi, puoi cortesemente digitare il codice di 16 cifre impresso sulla tua carta di pagamento?");
-            String codiceCarta= scanner.nextLine(); //correggere tipo su DCD
-            System.out.println("Quando scade la carta?");
-            LocalDate scadenzaCarta = LocalDate.parse(scanner.nextLine()); //da formattare e controllare che non sia scaduta
-            System.out.println("Digita il codice CVV di 3 cifre per favore, puoi trovarlo sul retro della carta ;)");
-            String CVV = scanner.nextLine();
-            System.out.println("Il titolare di questa carta sei tu? -> y/n");
-            String seiTitolareQuestion = scanner.nextLine();
+            LocalDate scadenzaCarta;
+        do {
+            System.out.println("Quando scade la carta? (inserire una carta non scaduta)");
+            scadenzaCarta = AirManager.inserisciData(scanner);
+
+            scadenzaCarta = AirManager.inserisciData(scanner);
+        }while(scadenzaCarta.isBefore(LocalDate.now()));
+            String CVV;
+            do {
+                System.out.println("Digita il codice CVV di 3 cifre per favore, puoi trovarlo sul retro della carta ;)");
+                CVV = scanner.nextLine();
+            }while(CVV.length()!=3 || !AirManager.isNumeric(CVV));
+            String seiTitolareQuestion;
+            boolean controlloTitolare=true;
+            do {
+                System.out.println("Il titolare di questa carta sei tu? -> y/n");
+                seiTitolareQuestion = scanner.nextLine().toLowerCase();
+                if(seiTitolareQuestion.equals("y") || seiTitolareQuestion.equals("n")) controlloTitolare=false;
+            }while(controlloTitolare);
+
             String nomeCognomeTitolare;
             if (seiTitolareQuestion.equalsIgnoreCase("y")) nomeCognomeTitolare=Nome.concat(" "+Cognome);
             else {System.out.println("Inserisci nome e cognome del titolare, per favore");
                 nomeCognomeTitolare=scanner.nextLine();
             }
-            System.out.println("Scegli un circuito tra quelli disponibili\n1. VISA\n2. MASTERCARD");
-            int circuitoQuestion= Integer.parseInt(scanner.nextLine());
+            int circuitoQuestion=0;
             String circuito;
-            if (circuitoQuestion==1) circuito="VISA"; else circuito="MASTERCARD";
+            String buffer;
+            do {
+                System.out.println("Scegli un circuito tra quelli disponibili\n1. VISA\n2. MASTERCARD");
+                buffer=scanner.nextLine();
+                if (AirManager.isNumeric(buffer)) circuitoQuestion=Integer.parseInt(buffer);
+
+
+
+            }while(circuitoQuestion<1 || circuitoQuestion>2);
+
+        if (circuitoQuestion == 1) circuito = "VISA";
+        else circuito = "MASTERCARD";
+
             CartaPagamento cartaPagamento = new CartaPagamento(20,circuito,nomeCognomeTitolare,codiceCarta,scadenzaCarta,CVV);
             p.setCartaPagamento(cartaPagamento);
             Transazione transazioneGenerata = cartaPagamento.getTransazione();
-            System.out.println("Stiamo contattando il servizio di pagamento...");
-            //AirManager.simulAttesa();
-            AirManager.gestionePagamento.richiediApprovazione(transazioneGenerata);
+            if(new ServizioPagamento_Adapter().richiediApprovazione(transazioneGenerata))
+                System.out.println("Il pagamento è andato a buon fine. La prenotazione è stata registrata"); //vince: aggiornare DCD
+
+
+
+
 
     }
 

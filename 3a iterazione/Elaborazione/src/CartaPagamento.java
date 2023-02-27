@@ -9,12 +9,15 @@ public class CartaPagamento {
     String circuito;
     Transazione transazione;
 
+
+
     public CartaPagamento(float importo, String circuito, String nomeCognomeIntestatario, String numeroCarta, LocalDate scadenza, String CVV){
         this.numeroCarta = numeroCarta;
         this.scadenza = scadenza;
         this.CVV  =CVV;
         this.nomeCognomeIntestatario = nomeCognomeIntestatario;
         this.circuito = circuito;
+
         transazione = new Transazione(this, importo); //vince: per cliente ho definito una funzione crea cartam qui mi sembra evitabile
     }
 
