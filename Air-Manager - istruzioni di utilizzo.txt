@@ -1,0 +1,15 @@
+Istruzioni di utilizzo:
+
+Sono state implementate le tre seguenti funzionalità:
+1. Effettua prenotazione (Acquisto biglietto)
+2. Cancella prenotazione
+3. Effettua check-in
+
+Nel provare il programma, si ricorda di cominciare eseguendo PER PRIMA l'operazione 1 di acquisto biglietto.
+Dopo aver effettuato una prenotazione, avendo generato un numero prenotazione, all'interno della
+stessa esecuzione sarà possibile provare le altre due funzionalità
+(cancella prenotazione, effettua check-in).
+
+In fase di inserimento del voucher, non avendo implementato il caso d'uso che prevede 
+la generazione del Voucher, si utilizza un Voucher pre-configurato, avente codice 1001.
+Occorre inserire, quindi, tale codice voucher (1001) nel provare le funzionalità implementate.
